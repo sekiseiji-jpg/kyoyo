@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6f4f">
+<meta name="description" content="一般教養をクイズ・読み物・1日1問・用語辞典で身につけるアプリ。オフラインで動きます。">
+<title>きょうよう Note</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<!-- CSS/JS は ?v=N 付きで読む。更新時は sw.js の CACHE と一緒に番号を上げる -->
+<link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+
+<header id="head">
+  <h1>きょうよう&nbsp;Note</h1>
+  <div class="head-right">
+    <span id="streak" class="streak" data-tip="学習した日が続いている数">🔥 0</span>
+    <button id="btn-set" class="icon-btn" title="設定">⚙</button>
+  </div>
+</header>
+
+<nav id="tabs" aria-label="画面の切り替え">
+  <button class="tab" data-tab="today" data-short="今日"><span class="ti">📅</span>今日</button>
+  <button class="tab" data-tab="learn" data-short="学ぶ"><span class="ti">📖</span>学ぶ</button>
+  <button class="tab" data-tab="quiz"  data-short="クイズ"><span class="ti">✏️</span>クイズ</button>
+  <button class="tab" data-tab="dict"  data-short="辞典"><span class="ti">🔍</span>辞典</button>
+  <button class="tab" data-tab="stats" data-short="記録"><span class="ti">📊</span>記録</button>
+  <button class="tab" data-tab="saved" data-short="保存"><span class="ti">⭐</span>保存</button>
+</nav>
+
+<main>
+
+  <!-- 📅 今日 -->
+  <section id="p-today" class="panel">
+    <div id="today-head" class="card today-head"></div>
+    <div id="today-quiz" class="card"></div>
+    <div id="today-read" class="card"></div>
+  </section>
+
+  <!-- 📖 学ぶ -->
+  <section id="p-learn" class="panel">
+    <div id="learn-nav" class="crumbs"></div>
+    <div id="learn-body"></div>
+  </section>
+
+  <!-- ✏️ クイズ -->
+  <section id="p-quiz" class="panel">
+    <div id="quiz-menu"></div>
+    <div id="quiz-area"></div>
+  </section>
+
+  <!-- 🔍 辞典 -->
+  <section id="p-dict" class="panel">
+    <div class="card">
+      <label class="field">
+        <span class="label">用語・人名でさがす</span>
+        <input id="dict-q" type="search" placeholder="例: 賦課方式、公開鍵暗号" autocomplete="off">
+      </label>
+      <div id="dict-count" class="muted"></div>
+    </div>
+    <div id="dict-body"></div>
+  </section>
+
+  <!-- 📊 記録 -->
+  <section id="p-stats" class="panel">
+    <div id="stats-body"></div>
+  </section>
+
+  <!-- ⭐ 保存 -->
+  <section id="p-saved" class="panel">
+    <div id="saved-body"></div>
+  </section>
+
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="tooltip" hidden></div>
+
+<dialog id="dlg-set">
+  <form method="dialog">
+    <h2>設定</h2>
+    <label class="field">
+      <span class="label">1日の目標（分）</span>
+      <input id="set-goal" type="number" min="1" max="600" step="1">
+    </label>
+    <label class="check">
+      <input id="set-shuffle" type="checkbox">
+      <span>クイズの選択肢を毎回入れ替える</span>
+    </label>
+    <div class="dlg-foot">
+      <button id="btn-reset" type="button" class="danger">学習記録を消す</button>
+      <button value="ok" class="primary">閉じる</button>
+    </div>
+    <p class="muted small">記録はこの端末のブラウザだけに保存されます。端末をまたいでは同期しません。</p>
+  </form>
+</dialog>
+
+<script src="data-units.js?v=2"></script>
+<script src="data-jinbun.js?v=2"></script>
+<script src="data-shakai.js?v=2"></script>
+<script src="data-shizen.js?v=2"></script>
+<script src="data-eigo.js?v=2"></script>
+<script src="data-kurashi.js?v=2"></script>
+<script src="index-term.js?v=2"></script>
+<script src="app.js?v=2"></script>
+</body>
+</html>
