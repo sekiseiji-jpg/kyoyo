@@ -325,7 +325,9 @@ const learn = {
     const t = TOPIC_BY_ID.get(this.state.topic);
     const ts = topicsOf(t.unit);
     const i = ts.findIndex((x) => x.id === t.id);
-    const paras = t.body.split('\n\n').map((p) => `<p>${esc(p)}</p>`).join('');
+    // 本文の **〜** を太字にする。esc() で HTML を無効にした後に置き換えるので安全
+    const paras = t.body.split('\n\n')
+      .map((p) => `<p>${esc(p).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</p>`).join('');
     const keys = (t.keys || []).map((k) => `<button class="key" data-term="${esc(k)}">${esc(k)}</button>`).join('');
 
     $('#learn-body').innerHTML = `
