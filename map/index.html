@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6f4f">
+<meta name="description" content="日本と世界の白地図を触って、都道府県と国の位置を覚えるアプリ。">
+<title>地図</title>
+<link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+
+<header class="bar">
+  <button id="btn-back" class="icon-btn" title="もどる" aria-label="もどる">◀</button>
+  <div class="bar-title"><span class="logo">🗺</span><h1 id="bar-title">地図</h1></div>
+  <button id="btn-reset" class="icon-btn" title="表示をもとに戻す" aria-label="表示をもとに戻す">⟳</button>
+</header>
+
+<main class="wrap">
+
+  <nav class="switch" id="map-switch" aria-label="地図の切り替え">
+    <button class="sw" data-map="jp">日本</button>
+    <button class="sw" data-map="world">世界</button>
+  </nav>
+
+  <nav class="tabs" id="mode-tabs" aria-label="使い方の切り替え">
+    <button class="tab" data-mode="look">見る</button>
+    <button class="tab" data-mode="quiz">クイズ</button>
+    <button class="tab" data-mode="list">一覧</button>
+  </nav>
+
+  <!-- 地図 -->
+  <section id="view-map" class="view">
+    <div id="prompt" class="prompt"></div>
+    <div id="stage" class="stage"></div>
+    <div id="panel" class="panel"></div>
+    <div id="choices" class="choices"></div>
+    <p class="hint" id="hint"></p>
+  </section>
+
+  <!-- 一覧 -->
+  <section id="view-list" class="view hidden">
+    <div id="list-body"></div>
+  </section>
+
+  <p class="foot" id="foot"></p>
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="data-jp.js?v=2"></script>
+<script src="data-world.js?v=2"></script>
+<script src="app.js?v=2"></script>
+</body>
+</html>

@@ -60,6 +60,8 @@ const QUIZ_BY_ID = new Map(QUIZ.map((q) => [q.id, q]));
 const topicsOf = (unitId) => TOPICS.filter((t) => t.unit === unitId);
 const quizOf = (unitId) => QUIZ.filter((q) => q.unit === unitId);
 const isReady = (unitId) => topicsOf(unitId).length > 0;
+// 単元が href を持つ分野（読書コーナー・地図）は、カードとクイズのかわりに別アプリを開く
+const isLinkField = (f) => f.units.some((u) => u.href);
 const readyUnits = () => UNITS.filter((u) => isReady(u.id));
 
 // ---------- 学習記録 ----------
@@ -287,13 +289,13 @@ const learn = {
         <span class="p-sub">${esc(names)}</span>
         ${f.desc ? `<span class="p-desc">${esc(f.desc)}</span>` : ''}`;
 
-      // 読書コーナーはカードもクイズも持たないので、作品数を出す
-      if (f.kind === 'read') {
-        const works = f.units.reduce((a, u) => a + (u.works || 0), 0);
+      // 別アプリを開く分野（読書コーナー・地図）はカードもクイズも持たないので、
+      // 読了の進み具合のかわりに data-units.js の meta をそのまま出す
+      if (isLinkField(f)) {
         return `<button class="p-card" style="--c:${esc(f.color || 'var(--primary)')}"
             data-field="${esc(f.key)}">
           ${head}
-          <span class="p-meta">${f.units.length}つの本棚 ／ 全${works}作品</span>
+          <span class="p-meta">${esc(f.meta || '')}</span>
         </button>`;
       }
 
@@ -319,23 +321,25 @@ const learn = {
       <div class="p-grid">${html}</div>`;
   },
 
-  /** 読書コーナーの中。単元を押すと本棚アプリ（koten/ など）を開く */
+  /** 別アプリを開く分野の中。単元を押すと koten/ や map/ が開く */
   viewShelf(f) {
     const html = f.units.map((u) => `<a class="tile" href="${esc(u.href)}">
       <span class="t-name">${esc(u.name)}</span>
-      <span class="t-sub">${u.works}作品${u.note ? ` ／ ${esc(u.note)}` : ''}</span>
+      <span class="t-sub">${esc(u.sub || '')}</span>
     </a>`).join('');
+    const note = f.kind === 'read'
+      ? `本棚は別の画面で開きます。本文は開いた巻だけを読み込むので、通信のない場所で
+         通して読むときは、本棚の設定（⚙）から「まとめて保存」しておいてください。`
+      : '地図は別の画面で開きます。つまんで拡大、引いて移動できます。';
     $('#learn-body').innerHTML = `<div class="grid">${html}</div>
       <p class="muted small" style="margin-top:12px">
-        本棚は別の画面で開きます。読み終えたら左上の「◀」でここへ戻れます。
-        本文は開いた巻だけを読み込むので、通信のない場所で通して読むときは、
-        本棚の設定（⚙）から「まとめて保存」しておいてください。
+        ${note}終わったら左上の「◀」でここへ戻れます。
       </p>`;
   },
 
   viewField() {
     const f = FIELDS.find((x) => x.key === this.state.field);
-    if (f.kind === 'read') return this.viewShelf(f);
+    if (isLinkField(f)) return this.viewShelf(f);
     const html = f.units.map((u) => {
       const ready = isReady(u.id);
       const ts = topicsOf(u.id);
@@ -897,10 +901,11 @@ document.addEventListener('focusout', () => document.body.classList.remove('kb-o
 // =========================================================
 renderStreak();
 // 起動時はいつも「今日」から始める。
-// ただし本棚（koten/ など）から「◀」で戻ってきたときは、読書コーナーに戻す。
-if (location.hash === '#dokusho') {
+// ただし別アプリ（koten/ や map/）から「◀」で戻ってきたときは、その分野に戻す。
+const backTo = location.hash.replace('#', '');
+if (backTo && FIELDS.some((f) => f.key === backTo && isLinkField(f))) {
   history.replaceState(null, '', location.pathname + location.search);
-  learn.state = { field: 'dokusho', unit: null, topic: null };
+  learn.state = { field: backTo, unit: null, topic: null };
   show('learn');
 } else {
   show('today');

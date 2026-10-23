@@ -1,0 +1,185 @@
+@charset "utf-8";
+
+/* 色は一般教養Note の本体に合わせてある（style.css の :root と同じ考え方） */
+:root {
+  --bg: #f4f7f4;
+  --surface: #ffffff;
+  --surface-2: #eef2ee;
+  --text: #1b2420;
+  --muted: #5d6b64;
+  --line: #d9e0db;
+  --primary: #2f6f4f;
+  --primary-weak: #e4efe8;
+  --good: #1f7a4d;
+  --bad: #b4342b;
+  --land: #dfe7e1;
+  --land-line: #ffffff;
+  --radius: 12px;
+  --shadow: 0 1px 2px rgba(20, 40, 30, .08), 0 4px 16px rgba(20, 40, 30, .05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141917;
+    --surface: #1d2422;
+    --surface-2: #27302c;
+    --text: #e6ece8;
+    --muted: #9baba3;
+    --line: #333d38;
+    --primary: #6cc295;
+    --primary-weak: #23332b;
+    --good: #6cc295;
+    --bad: #e8857c;
+    --land: #2c3833;
+    --land-line: #141917;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .25);
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP", sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ---------- ヘッダー ---------- */
+.bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 8px 12px;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 20;
+}
+.bar-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.bar-title h1 { margin: 0; font-size: 16px; white-space: nowrap; }
+.bar-title .logo { font-size: 18px; }
+.icon-btn {
+  border: 1px solid var(--line); background: var(--surface); color: var(--text);
+  border-radius: 10px; width: 36px; height: 36px; font-size: 15px; cursor: pointer; flex: none;
+}
+.icon-btn:hover { background: var(--surface-2); }
+
+.wrap { max-width: 920px; margin: 0 auto; padding: 12px 12px 32px; }
+
+/* ---------- 切り替え ---------- */
+.switch, .tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.sw, .tab {
+  flex: 1; padding: 8px 4px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); color: var(--muted);
+  font-size: 13px; font-family: inherit; cursor: pointer; white-space: nowrap;
+}
+.sw:hover, .tab:hover { background: var(--surface-2); }
+.sw.on, .tab.on { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; }
+.tabs { margin-bottom: 12px; }
+
+.view.hidden { display: none; }
+
+/* ---------- 地図 ---------- */
+.stage {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); overflow: hidden; touch-action: none; position: relative;
+}
+.stage svg { display: block; width: 100%; height: auto; cursor: grab; }
+.stage svg.drag { cursor: grabbing; }
+
+.stage path {
+  fill: var(--land); stroke: var(--land-line); stroke-width: 1;
+  stroke-linejoin: round; vector-effect: non-scaling-stroke;
+}
+.stage path.on { fill: var(--primary); }
+.stage path.ok { fill: var(--good); }
+.stage path.bad { fill: var(--bad); }
+.stage path.dim { opacity: .45; }
+/* 地方・大陸の色分け。彩度を抑えて、選択の緑と見分けられるようにする */
+.stage path.g0 { fill: #9b7fc4; } .stage path.g1 { fill: #c98a82; }
+.stage path.g2 { fill: #74a8cc; } .stage path.g3 { fill: #7fb49c; }
+.stage path.g4 { fill: #c0a05e; } .stage path.g5 { fill: #a0a6b4; }
+.stage path.g6 { fill: #cf9bb6; } .stage path.g7 { fill: #8fb076; }
+
+.stage .pin { fill: none; stroke: var(--primary); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+
+.zoom { position: absolute; right: 8px; bottom: 8px; display: flex; flex-direction: column; gap: 4px; }
+.zoom button {
+  width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--surface); color: var(--text); font-size: 16px; cursor: pointer; line-height: 1;
+}
+.zoom button:hover { background: var(--surface-2); }
+
+/* ---------- 出題と結果 ---------- */
+.prompt:empty, .panel:empty, .choices:empty, .hint:empty { display: none; }
+.prompt {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px 14px; margin-bottom: 10px; box-shadow: var(--shadow);
+}
+.prompt .q { font-size: 16px; font-weight: 700; }
+.prompt .meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.prompt .bar-wrap { height: 5px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin-top: 8px; }
+.prompt .bar-wrap i { display: block; height: 100%; background: var(--primary); transition: width .2s; }
+
+.panel {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px 14px; margin-top: 10px; box-shadow: var(--shadow);
+}
+.panel h2 { margin: 0 0 2px; font-size: 17px; }
+.panel .yomi { font-size: 12px; color: var(--muted); }
+.panel dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 8px 0 0; font-size: 14px; }
+.panel dt { color: var(--muted); font-size: 12px; }
+.panel dd { margin: 0; }
+.panel .judge { font-weight: 700; }
+.panel .judge.ok { color: var(--good); }
+.panel .judge.bad { color: var(--bad); }
+
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.choices button {
+  padding: 12px 10px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); color: var(--text); font-size: 15px; font-family: inherit;
+  cursor: pointer; line-height: 1.4;
+}
+.choices button:hover:not([disabled]) { background: var(--surface-2); }
+.choices button.pick-ok { border-color: var(--good); background: var(--primary-weak); font-weight: 700; }
+.choices button.pick-bad { border-color: var(--bad); }
+.choices button[disabled] { cursor: default; }
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.row.end { justify-content: flex-end; }
+.primary, .ghost {
+  padding: 9px 16px; border-radius: 10px; font-size: 14px; font-family: inherit; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--text);
+}
+.primary { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; }
+.ghost:hover { background: var(--surface-2); }
+
+.hint { font-size: 12px; color: var(--muted); margin: 10px 2px 0; }
+
+/* ---------- 一覧 ---------- */
+.group-head { margin: 14px 2px 6px; font-size: 13px; color: var(--muted); font-weight: 700; }
+.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.list button {
+  text-align: left; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); color: var(--text); font-family: inherit; cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.list .n { font-weight: 700; font-size: 14px; display: block; }
+.list .s { font-size: 12px; color: var(--muted); display: block; margin-top: 2px; }
+.list .miss { color: var(--bad); }
+
+.foot { font-size: 11px; color: var(--muted); text-align: center; margin-top: 24px; }
+
+#toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(10px);
+  background: var(--text); color: var(--bg); padding: 9px 16px; border-radius: 999px;
+  font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 40;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 640px) {
+  .wrap { padding: 10px 10px 28px; }
+  .choices { grid-template-columns: 1fr; }
+  .primary, .ghost { min-height: 44px; }
+  .choices button { min-height: 48px; }
+}
