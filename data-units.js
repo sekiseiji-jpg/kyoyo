@@ -1,10 +1,14 @@
 'use strict';
 // 5分野40単元の骨格（単元一覧.md が元）。データが無い単元は「準備中」と表示する。
 // pri は「作成順」を示すだけの記号（A → B → C の順に作る）。分量はどの単元も同じ。
+// color と desc はポータル（🏠 タブ）の分野カードで使う。
+// color は帯と進捗バーの装飾にだけ使うので、ライト/ダークの両方で見える中明度にする。
 
 window.FIELDS = [
   {
     key: 'jinbun', name: '人文科学', emoji: '🏛',
+    color: '#a452c4',
+    desc: '人が何を考え、どう暮らしてきたかをたどります。歴史と思想は時事の背景にもなります。',
     units: [
       { id: '1-1', name: '思想（西洋・東洋）', pri: 'C' },
       { id: '1-2', name: '日本史', pri: 'C' },
@@ -18,6 +22,8 @@ window.FIELDS = [
   },
   {
     key: 'shakai', name: '社会科学', emoji: '⚖️',
+    color: '#c9564a',
+    desc: '制度のしくみを押さえます。報道の言葉が何を指しているかが分かるようになります。',
     units: [
       { id: '2-1', name: '政治・統治', pri: 'B' },
       { id: '2-2', name: '経済・金融', pri: 'B' },
@@ -31,6 +37,8 @@ window.FIELDS = [
   },
   {
     key: 'shizen', name: '自然科学', emoji: '🔬',
+    color: '#3a97d4',
+    desc: 'しくみと桁を押さえます。細かい数値より、何がどう効くかを読み取れる形にしています。',
     units: [
       { id: '3-1', name: '物理', pri: 'C' },
       { id: '3-2', name: '化学', pri: 'C' },
@@ -44,6 +52,8 @@ window.FIELDS = [
   },
   {
     key: 'eigo', name: '英語', emoji: '🔤',
+    color: '#2f90a8',
+    desc: '解説はすべて日本語。語源から意味を推し、報道で使われる言い方を押さえます。',
     units: [
       { id: '4-1', name: '教養語彙', pri: 'C' },
       { id: '4-2', name: '語源・接頭辞', pri: 'B' },
@@ -57,6 +67,8 @@ window.FIELDS = [
   },
   {
     key: 'kurashi', name: '暮らしと常識', emoji: '🏠',
+    color: '#c08a2e',
+    desc: '迷いやすい場面の作法と、ことばの使い分けを確かめます。本アプリ固有の分野です。',
     units: [
       { id: '5-1', name: 'ビジネスマナー', pri: 'A' },
       { id: '5-2', name: '冠婚葬祭', pri: 'B' },

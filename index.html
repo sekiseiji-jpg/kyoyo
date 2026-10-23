@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
 <!-- CSS/JS は ?v=N 付きで読む。更新時は sw.js の CACHE と一緒に番号を上げる -->
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
@@ -23,6 +23,7 @@
 </header>
 
 <nav id="tabs" aria-label="画面の切り替え">
+  <button class="tab" data-tab="home"  data-short="ポータル"><span class="ti">🏠</span>ポータル</button>
   <button class="tab" data-tab="today" data-short="今日"><span class="ti">📅</span>今日</button>
   <button class="tab" data-tab="learn" data-short="学ぶ"><span class="ti">📖</span>学ぶ</button>
   <button class="tab" data-tab="quiz"  data-short="クイズ"><span class="ti">✏️</span>クイズ</button>
@@ -32,6 +33,12 @@
 </nav>
 
 <main>
+
+  <!-- 🏠 ポータル（起動時の入口。分野を選ぶと「学ぶ」へ入る） -->
+  <section id="p-home" class="panel">
+    <div id="home-head" class="portal-head"></div>
+    <div id="home-body"></div>
+  </section>
 
   <!-- 📅 今日 -->
   <section id="p-today" class="panel">
@@ -98,13 +105,13 @@
   </form>
 </dialog>
 
-<script src="data-units.js?v=3"></script>
-<script src="data-jinbun.js?v=3"></script>
-<script src="data-shakai.js?v=3"></script>
-<script src="data-shizen.js?v=3"></script>
-<script src="data-eigo.js?v=3"></script>
-<script src="data-kurashi.js?v=3"></script>
-<script src="index-term.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="data-units.js?v=4"></script>
+<script src="data-jinbun.js?v=4"></script>
+<script src="data-shakai.js?v=4"></script>
+<script src="data-shizen.js?v=4"></script>
+<script src="data-eigo.js?v=4"></script>
+<script src="data-kurashi.js?v=4"></script>
+<script src="index-term.js?v=4"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

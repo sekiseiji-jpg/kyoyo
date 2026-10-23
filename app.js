@@ -155,7 +155,6 @@ const VIEWS = {};  // tab 名 → render 関数（各機能が登録する）
 function show(tab) {
   $$('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
   $$('.panel').forEach((p) => p.classList.toggle('on', p.id === 'p-' + tab));
-  store.set('tab', tab);
   if (VIEWS[tab]) VIEWS[tab]();
   window.scrollTo(0, 0);
 }
@@ -165,6 +164,59 @@ $$('.tab').forEach((b) => b.addEventListener('click', () => show(b.dataset.tab))
 function renderStreak() {
   $('#streak').textContent = `🔥 ${stats.streak()}`;
 }
+
+// =========================================================
+// 🏠 ポータル（起動時の入口）
+// =========================================================
+const portal = {
+  /** 分野ごとの枚数・問数・読了数 */
+  tally(f) {
+    const ts = f.units.flatMap((u) => topicsOf(u.id));
+    const qs = f.units.reduce((a, u) => a + quizOf(u.id).length, 0);
+    const read = ts.filter((t) => marks.isRead(t.id)).length;
+    return { cards: ts.length, quiz: qs, read, ready: f.units.filter((u) => isReady(u.id)).length };
+  },
+
+  render() {
+    const all = FIELDS.reduce((a, f) => {
+      const t = this.tally(f);
+      return { cards: a.cards + t.cards, quiz: a.quiz + t.quiz, read: a.read + t.read };
+    }, { cards: 0, quiz: 0, read: 0 });
+    const units = FIELDS.reduce((a, f) => a + f.units.length, 0);
+
+    $('#home-head').innerHTML = `
+      <div class="logo">📚</div>
+      <h2>分野を選んでください</h2>
+      <p>${FIELDS.length}分野${units}単元 ／ カード${all.cards}枚・クイズ${all.quiz}問</p>
+      <p class="small">読了 ${all.read} / ${all.cards} 枚 ・ 連続 ${stats.streak()} 日</p>`;
+
+    const html = FIELDS.map((f) => {
+      const t = this.tally(f);
+      const pct = t.cards ? Math.round((t.read / t.cards) * 100) : 0;
+      const names = f.units.map((u) => u.name).join(' ・ ');
+      return `<button class="p-card" style="--c:${esc(f.color || 'var(--primary)')}"
+          data-portal="${esc(f.key)}" ${t.cards ? '' : 'disabled'}>
+        <span class="p-icon">${f.emoji}</span>
+        <span class="p-name">${esc(f.name)}</span>
+        <span class="p-sub">${esc(names)}</span>
+        ${f.desc ? `<span class="p-desc">${esc(f.desc)}</span>` : ''}
+        <span class="p-meta">${f.units.length}単元 ／ カード${t.cards}枚・クイズ${t.quiz}問</span>
+        ${t.cards
+          ? `<span class="p-bar"><i style="width:${pct}%"></i></span>
+             <span class="p-prog">読了 ${t.read} / ${t.cards} 枚（${pct}%）</span>`
+          : '<span class="p-prog">準備中</span>'}
+      </button>`;
+    }).join('');
+    $('#home-body').innerHTML = `<div class="p-grid">${html}</div>`;
+  },
+};
+
+$('#p-home').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-portal]');
+  if (b) learn.openField(b.dataset.portal);
+});
+
+VIEWS.home = () => portal.render();
 
 // =========================================================
 // 📅 今日（1日1問）
@@ -355,6 +407,13 @@ const learn = {
     if (!t) return;
     const u = UNIT_BY_ID.get(t.unit);
     this.state = { field: u.field, unit: t.unit, topic: id };
+    show('learn');
+  },
+
+  /** ポータルから分野の単元一覧へ入る */
+  openField(key) {
+    if (!FIELDS.some((f) => f.key === key)) return;
+    this.state = { field: key, unit: null, topic: null };
     show('learn');
   },
 
@@ -842,7 +901,8 @@ document.addEventListener('focusout', () => document.body.classList.remove('kb-o
 // 起動
 // =========================================================
 renderStreak();
-show(store.get('tab', 'today'));
+// 起動時はいつもポータルから。分野カードを押すと「学ぶ」へ入る
+show('home');
 
 if ('serviceWorker' in navigator && window.isSecureContext) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { /* 失敗しても動く */ }));
