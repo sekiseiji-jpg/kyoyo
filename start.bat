@@ -2,7 +2,7 @@
 chcp 65001 >nul
 cd /d "%~dp0"
 echo.
-echo  きょうよう Note を起動しました
+echo  一般教養Note を起動しました
 echo  ---------------------------------------------
 echo  このPC:  http://localhost:8792/
 for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /c:"IPv4"') do (

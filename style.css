@@ -67,7 +67,7 @@ body {
 
 /* ---------- タブ ---------- */
 #tabs {
-  display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;
   max-width: 920px; margin: 12px auto 0; padding: 0 16px;
 }
 .tab {
@@ -135,10 +135,9 @@ button { font-family: inherit; }
 .crumbs button { background: none; border: none; color: var(--primary); cursor: pointer; font-size: 13px; padding: 2px 4px; }
 .crumbs .sep { color: var(--muted); }
 
-/* ---------- ポータル（🏠 起動時の入口） ---------- */
+/* ---------- 分野のカード（「学ぶ」の入口。起動時にここから始まる） ---------- */
 .portal-head { text-align: center; margin: 2px 0 16px; }
-.portal-head .logo { font-size: 30px; line-height: 1; }
-.portal-head h2 { margin: 6px 0 4px; font-size: 17px; letter-spacing: .04em; }
+.portal-head h2 { margin: 0 0 4px; font-size: 17px; letter-spacing: .04em; }
 .portal-head p { margin: 0; font-size: 13px; color: var(--muted); }
 
 .p-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
@@ -282,7 +281,6 @@ dialog h2 { margin: 0 0 14px; font-size: 17px; }
   .field input, .field select { font-size: 16px; } /* iOS の自動拡大を防ぐ */
   .grid { grid-template-columns: 1fr 1fr; }
   .p-grid { grid-template-columns: 1fr; }
-  .portal-head .logo { font-size: 26px; }
   .primary, .ghost, .danger { min-height: 44px; }
   .q-choices button { min-height: 44px; }
   dialog { margin: auto auto 0; border-radius: 14px 14px 0 0; max-width: 100%; }

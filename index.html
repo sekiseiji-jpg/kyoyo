@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2f6f4f">
 <meta name="description" content="一般教養をクイズ・読み物・1日1問・用語辞典で身につけるアプリ。オフラインで動きます。">
-<title>きょうよう Note</title>
+<title>一般教養Note</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
 <!-- CSS/JS は ?v=N 付きで読む。更新時は sw.js の CACHE と一緒に番号を上げる -->
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
 <header id="head">
-  <h1>きょうよう&nbsp;Note</h1>
+  <h1>一般教養Note</h1>
   <div class="head-right">
     <span id="streak" class="streak" data-tip="学習した日が続いている数">🔥 0</span>
     <button id="btn-set" class="icon-btn" title="設定">⚙</button>
@@ -23,7 +23,6 @@
 </header>
 
 <nav id="tabs" aria-label="画面の切り替え">
-  <button class="tab" data-tab="home"  data-short="ポータル"><span class="ti">🏠</span>ポータル</button>
   <button class="tab" data-tab="today" data-short="今日"><span class="ti">📅</span>今日</button>
   <button class="tab" data-tab="learn" data-short="学ぶ"><span class="ti">📖</span>学ぶ</button>
   <button class="tab" data-tab="quiz"  data-short="クイズ"><span class="ti">✏️</span>クイズ</button>
@@ -33,12 +32,6 @@
 </nav>
 
 <main>
-
-  <!-- 🏠 ポータル（起動時の入口。分野を選ぶと「学ぶ」へ入る） -->
-  <section id="p-home" class="panel">
-    <div id="home-head" class="portal-head"></div>
-    <div id="home-body"></div>
-  </section>
 
   <!-- 📅 今日 -->
   <section id="p-today" class="panel">
@@ -105,13 +98,13 @@
   </form>
 </dialog>
 
-<script src="data-units.js?v=4"></script>
-<script src="data-jinbun.js?v=4"></script>
-<script src="data-shakai.js?v=4"></script>
-<script src="data-shizen.js?v=4"></script>
-<script src="data-eigo.js?v=4"></script>
-<script src="data-kurashi.js?v=4"></script>
-<script src="index-term.js?v=4"></script>
-<script src="app.js?v=4"></script>
+<script src="data-units.js?v=5"></script>
+<script src="data-jinbun.js?v=5"></script>
+<script src="data-shakai.js?v=5"></script>
+<script src="data-shizen.js?v=5"></script>
+<script src="data-eigo.js?v=5"></script>
+<script src="data-kurashi.js?v=5"></script>
+<script src="index-term.js?v=5"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

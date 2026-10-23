@@ -1,8 +1,9 @@
 'use strict';
 
 /* =========================================================
-   きょうよう Note
+   一般教養Note
    画面は6タブ（今日 / 学ぶ / クイズ / 辞典 / 記録 / 保存）。
+   起動時は「学ぶ」の入口（分野のカード）を開く。
    データは data-units.js（40単元の骨格）と data-*.js（カード・クイズ）。
    ========================================================= */
 
@@ -166,59 +167,6 @@ function renderStreak() {
 }
 
 // =========================================================
-// 🏠 ポータル（起動時の入口）
-// =========================================================
-const portal = {
-  /** 分野ごとの枚数・問数・読了数 */
-  tally(f) {
-    const ts = f.units.flatMap((u) => topicsOf(u.id));
-    const qs = f.units.reduce((a, u) => a + quizOf(u.id).length, 0);
-    const read = ts.filter((t) => marks.isRead(t.id)).length;
-    return { cards: ts.length, quiz: qs, read, ready: f.units.filter((u) => isReady(u.id)).length };
-  },
-
-  render() {
-    const all = FIELDS.reduce((a, f) => {
-      const t = this.tally(f);
-      return { cards: a.cards + t.cards, quiz: a.quiz + t.quiz, read: a.read + t.read };
-    }, { cards: 0, quiz: 0, read: 0 });
-    const units = FIELDS.reduce((a, f) => a + f.units.length, 0);
-
-    $('#home-head').innerHTML = `
-      <div class="logo">📚</div>
-      <h2>分野を選んでください</h2>
-      <p>${FIELDS.length}分野${units}単元 ／ カード${all.cards}枚・クイズ${all.quiz}問</p>
-      <p class="small">読了 ${all.read} / ${all.cards} 枚 ・ 連続 ${stats.streak()} 日</p>`;
-
-    const html = FIELDS.map((f) => {
-      const t = this.tally(f);
-      const pct = t.cards ? Math.round((t.read / t.cards) * 100) : 0;
-      const names = f.units.map((u) => u.name).join(' ・ ');
-      return `<button class="p-card" style="--c:${esc(f.color || 'var(--primary)')}"
-          data-portal="${esc(f.key)}" ${t.cards ? '' : 'disabled'}>
-        <span class="p-icon">${f.emoji}</span>
-        <span class="p-name">${esc(f.name)}</span>
-        <span class="p-sub">${esc(names)}</span>
-        ${f.desc ? `<span class="p-desc">${esc(f.desc)}</span>` : ''}
-        <span class="p-meta">${f.units.length}単元 ／ カード${t.cards}枚・クイズ${t.quiz}問</span>
-        ${t.cards
-          ? `<span class="p-bar"><i style="width:${pct}%"></i></span>
-             <span class="p-prog">読了 ${t.read} / ${t.cards} 枚（${pct}%）</span>`
-          : '<span class="p-prog">準備中</span>'}
-      </button>`;
-    }).join('');
-    $('#home-body').innerHTML = `<div class="p-grid">${html}</div>`;
-  },
-};
-
-$('#p-home').addEventListener('click', (e) => {
-  const b = e.target.closest('[data-portal]');
-  if (b) learn.openField(b.dataset.portal);
-});
-
-VIEWS.home = () => portal.render();
-
-// =========================================================
 // 📅 今日（1日1問）
 // =========================================================
 const today = {
@@ -318,17 +266,46 @@ const learn = {
     else this.viewRoot();
   },
 
+  /** 分野ごとの枚数・問数・読了数 */
+  tally(f) {
+    const ts = f.units.flatMap((u) => topicsOf(u.id));
+    const read = ts.filter((t) => marks.isRead(t.id)).length;
+    return { cards: ts.length, quiz: f.units.reduce((a, u) => a + quizOf(u.id).length, 0), read };
+  },
+
+  /** 入口。分野のカードを並べる（アプリを開くとこの画面から始まる） */
   viewRoot() {
+    const all = FIELDS.reduce((a, f) => {
+      const t = this.tally(f);
+      return { cards: a.cards + t.cards, quiz: a.quiz + t.quiz, read: a.read + t.read };
+    }, { cards: 0, quiz: 0, read: 0 });
+    const units = FIELDS.reduce((a, f) => a + f.units.length, 0);
+
     const html = FIELDS.map((f) => {
-      const n = f.units.filter((u) => isReady(u.id)).length;
-      const cards = f.units.reduce((a, u) => a + topicsOf(u.id).length, 0);
-      return `<button class="tile" data-field="${esc(f.key)}">
-        <span class="t-emoji">${f.emoji}</span>
-        <span class="t-name">${esc(f.name)}</span>
-        <span class="t-sub">${f.units.length}単元 ／ 公開 ${n}単元・カード${cards}枚</span>
+      const t = this.tally(f);
+      const pct = t.cards ? Math.round((t.read / t.cards) * 100) : 0;
+      const names = f.units.map((u) => u.name).join(' ・ ');
+      return `<button class="p-card" style="--c:${esc(f.color || 'var(--primary)')}"
+          data-field="${esc(f.key)}" ${t.cards ? '' : 'disabled'}>
+        <span class="p-icon">${f.emoji}</span>
+        <span class="p-name">${esc(f.name)}</span>
+        <span class="p-sub">${esc(names)}</span>
+        ${f.desc ? `<span class="p-desc">${esc(f.desc)}</span>` : ''}
+        <span class="p-meta">${f.units.length}単元 ／ カード${t.cards}枚・クイズ${t.quiz}問</span>
+        ${t.cards
+          ? `<span class="p-bar"><i style="width:${pct}%"></i></span>
+             <span class="p-prog">読了 ${t.read} / ${t.cards} 枚（${pct}%）</span>`
+          : '<span class="p-prog">準備中</span>'}
       </button>`;
     }).join('');
-    $('#learn-body').innerHTML = `<div class="grid">${html}</div>`;
+
+    $('#learn-body').innerHTML = `
+      <div class="portal-head">
+        <h2>分野を選んでください</h2>
+        <p>${FIELDS.length}分野${units}単元 ／ カード${all.cards}枚・クイズ${all.quiz}問</p>
+        <p class="small">読了 ${all.read} / ${all.cards} 枚</p>
+      </div>
+      <div class="p-grid">${html}</div>`;
   },
 
   viewField() {
@@ -407,13 +384,6 @@ const learn = {
     if (!t) return;
     const u = UNIT_BY_ID.get(t.unit);
     this.state = { field: u.field, unit: t.unit, topic: id };
-    show('learn');
-  },
-
-  /** ポータルから分野の単元一覧へ入る */
-  openField(key) {
-    if (!FIELDS.some((f) => f.key === key)) return;
-    this.state = { field: key, unit: null, topic: null };
     show('learn');
   },
 
@@ -901,8 +871,8 @@ document.addEventListener('focusout', () => document.body.classList.remove('kb-o
 // 起動
 // =========================================================
 renderStreak();
-// 起動時はいつもポータルから。分野カードを押すと「学ぶ」へ入る
-show('home');
+// 起動時はいつも「学ぶ」の入口（分野のカード）から始める
+show('learn');
 
 if ('serviceWorker' in navigator && window.isSecureContext) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { /* 失敗しても動く */ }));
