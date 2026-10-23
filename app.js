@@ -2,8 +2,7 @@
 
 /* =========================================================
    一般教養Note
-   画面は6タブ（今日 / 学ぶ / クイズ / 辞典 / 記録 / 保存）。
-   起動時は「学ぶ」の入口（分野のカード）を開く。
+   画面は6タブ（今日 / 学ぶ / クイズ / 辞典 / 記録 / 保存）。起動時は「今日」を開く。
    データは data-units.js（40単元の骨格）と data-*.js（カード・クイズ）。
    ========================================================= */
 
@@ -871,8 +870,8 @@ document.addEventListener('focusout', () => document.body.classList.remove('kb-o
 // 起動
 // =========================================================
 renderStreak();
-// 起動時はいつも「学ぶ」の入口（分野のカード）から始める
-show('learn');
+// 起動時はいつも「今日」から始める
+show('today');
 
 if ('serviceWorker' in navigator && window.isSecureContext) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { /* 失敗しても動く */ }));
