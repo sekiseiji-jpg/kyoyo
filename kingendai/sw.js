@@ -54,7 +54,9 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
       .then((ks) => Promise.all(ks
-        .filter((k) => k !== CACHE && k !== TEXTS)
+        // 消すのは自分の古い版だけにする。キャッシュはドメイン全体で共有なので、
+        // 名前で絞らないと同じドメインに置いた別のアプリまで消してしまう
+        .filter((k) => k.startsWith('kingendai') && k !== CACHE && k !== TEXTS)
         .map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
