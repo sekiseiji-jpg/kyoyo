@@ -80,8 +80,25 @@ window.FIELDS = [
       { id: '5-8', name: '雑学', pri: 'B' },
     ],
   },
+
+  // 読書コーナーだけは作りが違う。カードとクイズを持たず、単元が本棚アプリへの入口になる。
+  // 本棚は koten/ kingendai/ eibei/ に丸ごと置いてあり、中身は学習アプリのものと同じ。
+  {
+    key: 'dokusho', name: '読書コーナー', emoji: '📚',
+    color: '#7a3b6a',
+    kind: 'read',
+    desc: '原文と現代語訳を並べて、名作を通しで読めます。巻ごとに要約と読み上げつき。',
+    units: [
+      { id: '6-1', name: '日本古典文学', href: 'koten/', works: 5,
+        note: '竹取物語・土佐日記・枕草子・平家物語・源氏物語（全五十四帖）' },
+      { id: '6-2', name: '日本近現代文学', href: 'kingendai/', works: 30,
+        note: '漱石・鴎外・芥川・太宰・賢治ほか。作家の紹介つき' },
+      { id: '6-3', name: '英米文学', href: 'eibei/', works: 10,
+        note: 'アリス・ホームズ・オズ・若草物語ほか。原文と訳の対照つき' },
+    ],
+  },
 ];
 
-// 単元あたりの目標量。全単元で共通（カード10枚・クイズ30問 = 全体で400枚・1200問）
+// 単元あたりの目標量。読書コーナーを除く全単元で共通（カード10枚・クイズ30問 = 400枚・1200問）
 window.UNIT_PLAN = { cards: 10, quiz: 30 };
 window.PRI_PLAN = { A: window.UNIT_PLAN, B: window.UNIT_PLAN, C: window.UNIT_PLAN };

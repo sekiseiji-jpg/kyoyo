@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7a3b6a">
+<meta name="description" content="古典文学を原文と現代語訳で通して読めるアプリ。巻ごとに要約つき。源氏物語全五十四帖を収録。">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="古典文学">
+<title>古典文学</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="style.css?v=30">
+</head>
+<body>
+
+<header class="bar">
+  <button id="btn-back" class="icon-btn" title="もどる" aria-label="もどる">◀</button>
+  <div class="bar-title"><span class="logo">📕</span><h1 id="bar-title">古典文学</h1></div>
+  <button id="btn-set" class="icon-btn" title="設定" aria-label="設定">⚙</button>
+</header>
+
+<main class="wrap">
+
+  <!-- 作品一覧 -->
+  <section id="view-works" class="view">
+    <p class="lead" id="works-lead"></p>
+    <div id="work-list" class="grid"></div>
+    <div class="note">
+      <b>このアプリについて</b>
+      <ul>
+        <li>原文と現代語訳を、巻ごとに切り替えて読めます。</li>
+        <li>巻を開くと、まず要約が出ます。あらすじをつかんでから本文に入れます。</li>
+        <li>本文は開いた巻だけを読み込みます。読んだ巻は端末に残るので、次からは通信がなくても開けます。</li>
+        <li>通信のない場所で通して読むときは、設定（⚙）から全巻をまとめて保存しておいてください。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 作品の扉 -->
+  <section id="view-work" class="view hidden">
+    <div class="hero" id="work-hero"></div>
+    <div class="tabs" id="work-tabs">
+      <button class="tab on" data-wtab="maki">巻一覧</button>
+      <button class="tab" data-wtab="about">この作品について</button>
+      <button class="tab" data-wtab="source">本文の出どころ</button>
+    </div>
+    <div id="work-maki" class="wpane"></div>
+    <div id="work-about" class="wpane hidden"></div>
+    <div id="work-source" class="wpane hidden"></div>
+  </section>
+
+  <!-- 巻 -->
+  <section id="view-maki" class="view hidden">
+    <div class="maki-head" id="maki-head"></div>
+    <div class="summary" id="maki-summary"></div>
+    <div class="switch" id="maki-switch">
+      <button class="sw on" data-text="yaku">現代語訳</button>
+      <button class="sw" data-text="genbun">原文</button>
+      <button class="sw" data-text="taisho">対照</button>
+      <span class="sw-note" id="sw-note"></span>
+    </div>
+    <div class="speak" id="maki-speak">
+      <button class="sw" id="sp-play" type="button">▶ 読み上げ</button>
+      <label class="sp-rate">速さ
+        <select id="sp-rate">
+          <option value="0.7">ゆっくり</option>
+          <option value="1">ふつう</option>
+          <option value="1.3">はやめ</option>
+          <option value="1.6">とてもはやい</option>
+        </select>
+      </label>
+      <span class="sw-note" id="sp-note"></span>
+    </div>
+    <article id="maki-body" class="body"></article>
+    <nav class="pager" id="maki-pager"></nav>
+  </section>
+
+</main>
+
+<!-- 設定 -->
+<div id="setwrap" class="modal hidden">
+  <div class="sheet">
+    <h2>設定</h2>
+    <label class="row"><span>文字サイズ</span>
+      <select id="set-size"><option value="s">小</option><option value="m">中</option><option value="l">大</option><option value="xl">特大</option></select>
+    </label>
+    <label class="row"><span>配色</span>
+      <select id="set-theme"><option value="auto">端末に合わせる</option><option value="light">ライト</option><option value="dark">ダーク</option><option value="sepia">セピア</option></select>
+    </label>
+    <label class="row"><span>行間</span>
+      <select id="set-lh"><option value="n">ふつう</option><option value="w">ひろめ</option></select>
+    </label>
+
+    <div class="sect">
+      <h3>オフラインで読む</h3>
+      <div id="dl-list"></div>
+      <p class="hint" id="dl-hint"></p>
+    </div>
+
+    <div class="sect">
+      <h3>読書記録</h3>
+      <div class="row rowbtn">
+        <span id="read-hint">読んだ巻</span>
+        <button id="btn-clear" class="mini">消す</button>
+      </div>
+    </div>
+    <button id="btn-close" class="close">閉じる</button>
+  </div>
+</div>
+
+<script src="data-works.js?v=30"></script>
+<script src="app.js?v=30"></script>
+</body>
+</html>

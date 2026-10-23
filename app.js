@@ -281,15 +281,27 @@ const learn = {
     const units = FIELDS.reduce((a, f) => a + f.units.length, 0);
 
     const html = FIELDS.map((f) => {
-      const t = this.tally(f);
-      const pct = t.cards ? Math.round((t.read / t.cards) * 100) : 0;
       const names = f.units.map((u) => u.name).join(' ・ ');
-      return `<button class="p-card" style="--c:${esc(f.color || 'var(--primary)')}"
-          data-field="${esc(f.key)}" ${t.cards ? '' : 'disabled'}>
-        <span class="p-icon">${f.emoji}</span>
+      const head = `<span class="p-icon">${f.emoji}</span>
         <span class="p-name">${esc(f.name)}</span>
         <span class="p-sub">${esc(names)}</span>
-        ${f.desc ? `<span class="p-desc">${esc(f.desc)}</span>` : ''}
+        ${f.desc ? `<span class="p-desc">${esc(f.desc)}</span>` : ''}`;
+
+      // 読書コーナーはカードもクイズも持たないので、作品数を出す
+      if (f.kind === 'read') {
+        const works = f.units.reduce((a, u) => a + (u.works || 0), 0);
+        return `<button class="p-card" style="--c:${esc(f.color || 'var(--primary)')}"
+            data-field="${esc(f.key)}">
+          ${head}
+          <span class="p-meta">${f.units.length}つの本棚 ／ 全${works}作品</span>
+        </button>`;
+      }
+
+      const t = this.tally(f);
+      const pct = t.cards ? Math.round((t.read / t.cards) * 100) : 0;
+      return `<button class="p-card" style="--c:${esc(f.color || 'var(--primary)')}"
+          data-field="${esc(f.key)}" ${t.cards ? '' : 'disabled'}>
+        ${head}
         <span class="p-meta">${f.units.length}単元 ／ カード${t.cards}枚・クイズ${t.quiz}問</span>
         ${t.cards
           ? `<span class="p-bar"><i style="width:${pct}%"></i></span>
@@ -307,8 +319,23 @@ const learn = {
       <div class="p-grid">${html}</div>`;
   },
 
+  /** 読書コーナーの中。単元を押すと本棚アプリ（koten/ など）を開く */
+  viewShelf(f) {
+    const html = f.units.map((u) => `<a class="tile" href="${esc(u.href)}">
+      <span class="t-name">${esc(u.name)}</span>
+      <span class="t-sub">${u.works}作品${u.note ? ` ／ ${esc(u.note)}` : ''}</span>
+    </a>`).join('');
+    $('#learn-body').innerHTML = `<div class="grid">${html}</div>
+      <p class="muted small" style="margin-top:12px">
+        本棚は別の画面で開きます。読み終えたら左上の「◀」でここへ戻れます。
+        本文は開いた巻だけを読み込むので、通信のない場所で通して読むときは、
+        本棚の設定（⚙）から「まとめて保存」しておいてください。
+      </p>`;
+  },
+
   viewField() {
     const f = FIELDS.find((x) => x.key === this.state.field);
+    if (f.kind === 'read') return this.viewShelf(f);
     const html = f.units.map((u) => {
       const ready = isReady(u.id);
       const ts = topicsOf(u.id);

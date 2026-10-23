@@ -96,6 +96,8 @@ QUIZ.forEach((q) => {
 // 単元ごとの分量が計画どおりか
 const summary = [];
 for (const [id, u] of UNIT) {
+  // 読書コーナーの単元は本棚アプリ（koten/ など）を開くだけで、カードもクイズも持たない
+  if (u.href) continue;
   const ts = TOPICS.filter((t) => t.unit === id);
   const qs = QUIZ.filter((q) => q.unit === id);
   if (!ts.length && !qs.length) { summary.push({ id, name: u.name, pri: u.pri, c: 0, q: 0, state: '準備中' }); continue; }
@@ -179,7 +181,8 @@ window.TERMS = ${JSON.stringify(sorted, null, 1)};
 const ready = summary.filter((s) => s.state === '公開');
 console.log('分野ファイル:');
 written.forEach((w) => console.log(`  ${w.out.padEnd(18)} ${String(w.ids).padStart(2)}単元 ${String(w.kb).padStart(4)}KB`));
-console.log(`\n単元 ${ready.length} / ${UNIT.size} ／ カード ${TOPICS.length} 枚 ／ クイズ ${QUIZ.length} 問 ／ 見出し ${Object.keys(sorted).length} 語`);
+const planned = [...UNIT.values()].filter((u) => !u.href).length;
+console.log(`\n単元 ${ready.length} / ${planned} ／ カード ${TOPICS.length} 枚 ／ クイズ ${QUIZ.length} 問 ／ 見出し ${Object.keys(sorted).length} 語`);
 const byPri = { A: [0, 0, 0], B: [0, 0, 0], C: [0, 0, 0] };
 ready.forEach((s) => { byPri[s.pri][0]++; byPri[s.pri][1] += s.c; byPri[s.pri][2] += s.q; });
 Object.entries(byPri).forEach(([p, v]) => console.log(`  優先度${p}: ${v[0]}単元 カード${v[1]}枚 クイズ${v[2]}問`));

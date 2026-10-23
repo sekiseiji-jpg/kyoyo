@@ -1,7 +1,7 @@
 // オフライン対応: アプリのファイルはネット優先で取得し、つながらないときはキャッシュを使う
 // 公開ファイルを更新したら CACHE の番号と、index.html の ?v= の番号を一緒に上げる
 // （?v= で index.html と同じ版の CSS/JS を読むので、更新の途中で新旧が混ざらない）
-const CACHE = 'kyoyo-v7';
+const CACHE = 'kyoyo-v8';
 const FILES = [
   './',
   'index.html',
@@ -38,9 +38,16 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+// 読書コーナーの本棚。それぞれが自分の Service Worker とキャッシュを持っているので、
+// こちらは手を出さない（本文は量が多く、開いた巻だけを本棚側が保存する作りになっている）
+const SHELVES = ['/koten/', '/kingendai/', '/eibei/'];
+
 self.addEventListener('fetch', (e) => {
   const req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+  if (SHELVES.some((s) => url.pathname.includes(s))) return;
   // 毎回サーバーに更新を確認する。ページ遷移にはオプションを付けられないので URL で取り直す
   const fresh = req.mode === 'navigate' ? fetch(req.url, { cache: 'no-cache' }) : fetch(req, { cache: 'no-cache' });
   e.respondWith(

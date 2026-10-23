@@ -1,0 +1,228 @@
+/* 古典文学 ― 読むためのアプリ。配色はすべて CSS 変数で、ライト／ダーク／セピアを切り替える。 */
+:root{
+  --c:#7a3b6a; --soft:#f1e3ee; --accent:#9a7b3a;
+  --bg:#fbf7fa; --surface:#ffffff; --surface2:#fdfafc;
+  --border:#e6d5e1; --text:#1f1a1e; --muted:#6a5c64;
+  --header:#7a3b6a; --header-fg:#fdf7fb;
+  --mark:#ffe9a8;
+  --fs:17px; --lh:1.95; --maxw:760px;
+  --mincho:"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP",serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]):not([data-theme="sepia"]){
+    --bg:#141016; --surface:#1d151c; --surface2:#181219;
+    --border:#372a34; --text:#eee5ec; --muted:#a4959e;
+    --c:#d08ac0; --soft:#2e1a2a; --header:#3a1832; --header-fg:#f5e9f2;
+    --accent:#dcc07a; --mark:#5c4a12;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141016; --surface:#1d151c; --surface2:#181219;
+  --border:#372a34; --text:#eee5ec; --muted:#a4959e;
+  --c:#d08ac0; --soft:#2e1a2a; --header:#3a1832; --header-fg:#f5e9f2;
+  --accent:#dcc07a; --mark:#5c4a12;
+}
+:root[data-theme="sepia"]{
+  --bg:#f4ece0; --surface:#fbf5ea; --surface2:#f8f1e4;
+  --border:#e0d2bb; --text:#3a3027; --muted:#6f6253;
+  --c:#8a5a3b; --soft:#efe3d2; --header:#7a4d31; --header-fg:#fbf5ea;
+  --accent:#9a7b3a; --mark:#ffe9a8;
+}
+:root[data-size="s"]{--fs:15px} :root[data-size="m"]{--fs:17px}
+:root[data-size="l"]{--fs:19.5px} :root[data-size="xl"]{--fs:22px}
+:root[data-lh="w"]{--lh:2.3}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:var(--mincho); font-size:var(--fs); line-height:1.75;
+  -webkit-text-size-adjust:100%;
+}
+.hidden{display:none !important}
+
+/* ヘッダー */
+.bar{
+  position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:10px;
+  padding:10px 14px; padding-top:calc(10px + env(safe-area-inset-top));
+  background:var(--header); color:var(--header-fg);
+}
+.bar-title{display:flex; align-items:center; gap:8px; flex:1; min-width:0}
+.bar h1{margin:0; font-size:1.06rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.logo{font-size:1.2rem}
+.icon-btn{
+  flex:none; width:38px; height:38px; border-radius:11px; border:0; cursor:pointer;
+  background:rgba(255,255,255,.16); color:var(--header-fg); font-size:1rem;
+}
+.icon-btn:hover{background:rgba(255,255,255,.26)}
+
+.wrap{max-width:var(--maxw); margin:0 auto; padding:18px 16px 60px}
+.lead{color:var(--muted); margin:4px 0 18px}
+
+/* 作品一覧 */
+.grid{display:grid; gap:14px}
+.card{
+  display:block; text-align:left; width:100%; cursor:pointer;
+  background:var(--surface); border:1px solid var(--border); border-left:5px solid var(--wc,var(--c));
+  border-radius:14px; padding:16px 18px; color:inherit; font:inherit;
+}
+.card:hover{background:var(--surface2)}
+.card .ic{font-size:1.5rem}
+.card h2{margin:6px 0 2px; font-size:1.2rem; color:var(--wc,var(--c))}
+.card .by{color:var(--muted); font-size:.86rem}
+.card .ld{margin-top:8px}
+.card .meta{margin-top:10px; color:var(--muted); font-size:.82rem}
+
+/* 作品の扉 */
+.hero{
+  background:var(--soft); border-radius:16px; padding:20px 20px 18px; margin-bottom:16px;
+}
+.hero .ic{font-size:2rem}
+.hero h2{margin:6px 0 2px; font-size:1.5rem; color:var(--c)}
+.hero .by{color:var(--muted); font-size:.9rem}
+.hero .ld{margin-top:10px}
+
+.tabs{display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap}
+.tab{
+  border:1px solid var(--border); background:var(--surface); color:var(--muted);
+  border-radius:999px; padding:7px 15px; font:inherit; font-size:.9rem; cursor:pointer;
+}
+.tab.on{background:var(--soft); color:var(--c); border-color:var(--c); font-weight:600}
+
+.partbox{margin:0 0 14px; padding:12px 16px; background:var(--surface2); border:1px solid var(--border); border-radius:12px}
+.partbox b{color:var(--c)}
+.partbox .rg{color:var(--muted); font-size:.84rem; margin-left:8px}
+.partbox p{margin:6px 0 0; color:var(--muted); font-size:.92rem}
+
+.makilist{display:grid; gap:9px}
+.mk{
+  display:flex; gap:12px; align-items:flex-start; width:100%; text-align:left; cursor:pointer;
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:12px 14px; color:inherit; font:inherit;
+}
+.mk:hover{background:var(--surface2)}
+.mk .no{
+  flex:none; width:2.3em; height:2.3em; border-radius:50%; background:var(--soft); color:var(--c);
+  display:flex; align-items:center; justify-content:center; font-size:.84rem; font-weight:700;
+}
+.mk .tx{flex:1; min-width:0}
+.mk .nm{font-weight:600}
+.mk .ym{color:var(--muted); font-size:.78rem; margin-left:7px; font-weight:400}
+.mk .ld{color:var(--muted); font-size:.9rem; margin-top:3px}
+.mk .rd{flex:none; font-size:.72rem; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:1px 7px}
+
+.wpane .src{margin:0 0 12px; padding:13px 16px; background:var(--surface2); border:1px solid var(--border); border-radius:12px}
+.wpane .src b{color:var(--c)}
+.wpane .src .who{color:var(--muted); font-size:.86rem; margin-left:6px}
+.wpane .src p{margin:7px 0 0; color:var(--muted); font-size:.9rem; line-height:1.8}
+.wpane p.about{margin:0 0 13px}
+
+/* 巻 */
+.maki-head{margin-bottom:12px}
+.maki-head .no{color:var(--muted); font-size:.85rem}
+.maki-head h2{margin:2px 0 0; font-size:1.6rem; color:var(--c)}
+.maki-head .ym{color:var(--muted); font-size:.85rem}
+.summary{
+  background:var(--soft); border-radius:14px; padding:16px 18px; margin-bottom:16px;
+}
+.summary b{display:block; color:var(--c); font-size:.86rem; margin-bottom:6px}
+.summary p{margin:0 0 9px; line-height:1.9}
+.summary p:last-child{margin-bottom:0}
+
+.switch{display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap}
+.sw{
+  border:1px solid var(--border); background:var(--surface); color:var(--muted);
+  border-radius:999px; padding:7px 17px; font:inherit; font-size:.92rem; cursor:pointer;
+}
+.sw.on{background:var(--c); color:#fff; border-color:var(--c); font-weight:600}
+.sw-note{color:var(--muted); font-size:.78rem}
+
+.body{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:22px 22px 26px; line-height:var(--lh);
+}
+.body p{margin:0 0 1.5em; text-indent:1em}
+.body p:last-child{margin-bottom:0}
+.body p.waka{
+  text-indent:0; margin:1.6em 0; padding-left:2em; color:var(--c);
+  font-size:1.03em; line-height:2.1;
+}
+.body .loading{color:var(--muted); text-align:center; padding:40px 0}
+.body .err{color:#c0392b; text-align:center; padding:30px 0}
+.body.genbun{letter-spacing:.02em}
+
+.pager{display:flex; gap:10px; margin-top:18px}
+.pager button{
+  flex:1; border:1px solid var(--border); background:var(--surface); color:var(--c);
+  border-radius:12px; padding:13px 10px; font:inherit; cursor:pointer;
+}
+.pager button:hover{background:var(--surface2)}
+.pager button:disabled{opacity:.4; cursor:default}
+
+.note{margin-top:22px; padding:14px 18px; background:var(--surface2); border:1px solid var(--border); border-radius:12px; color:var(--muted); font-size:.9rem}
+.note b{color:var(--text)}
+.note ul{margin:8px 0 0; padding-left:1.2em}
+.note li{margin:4px 0}
+
+/* 設定 */
+.modal{position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.45); display:flex; align-items:flex-end; justify-content:center}
+.sheet{
+  background:var(--surface); width:100%; max-width:460px; border-radius:18px 18px 0 0;
+  padding:20px 20px calc(20px + env(safe-area-inset-bottom));
+  max-height:88vh; overflow:auto;
+}
+.sheet h2{margin:0 0 14px; font-size:1.12rem; color:var(--c)}
+.row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:9px 0; border-bottom:1px solid var(--border)}
+.row select{font:inherit; font-size:.95rem; padding:6px 10px; border-radius:9px; border:1px solid var(--border); background:var(--surface2); color:var(--text)}
+.mini{font:inherit; font-size:.86rem; padding:6px 13px; border-radius:9px; border:1px solid var(--border); background:var(--surface2); color:var(--text); cursor:pointer}
+.hint{color:var(--muted); font-size:.8rem; margin:12px 0 0; line-height:1.7}
+.sect{margin-top:18px}
+.sect h3{
+  margin:0 0 4px; font-size:.84rem; font-weight:600; color:var(--c);
+  letter-spacing:.04em;
+}
+.sect .row:last-of-type{border-bottom:0}
+
+/* 本文のまとめ保存 */
+.dl{padding:10px 0; border-bottom:1px solid var(--border)}
+.dl-top{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
+.dl-top b{font-size:.98rem}
+.dl-state{color:var(--muted); font-size:.78rem; text-align:right}
+.dl-bar{
+  height:6px; margin:9px 0 2px; border-radius:999px;
+  background:var(--soft); overflow:hidden;
+}
+.dl-bar i{display:block; height:100%; width:0; background:var(--c); transition:width .15s linear}
+.dl-btns{display:flex; gap:8px; margin-top:9px}
+.dl-btns .mini{flex:1}
+.dl-btns .mini:disabled{opacity:.45; cursor:default}
+.close{width:100%; margin-top:16px; padding:13px; border:0; border-radius:12px; background:var(--c); color:#fff; font:inherit; cursor:pointer}
+
+@media (max-width:480px){
+  .wrap{padding:14px 14px 50px}
+  .body{padding:18px 16px 22px}
+  .hero{padding:16px}
+}
+
+/* 対照表示：原文の一段と、その訳を続けて見せる */
+.body.taisho p{text-indent:0; margin:0}
+.body.taisho .pair{
+  margin:0 0 1.9em; padding:0 0 1.4em; border-bottom:1px solid var(--border);
+}
+.body.taisho .pair:last-child{border-bottom:0; padding-bottom:0; margin-bottom:0}
+.body.taisho .gen{letter-spacing:.02em; margin-bottom:.7em}
+.body.taisho .gen.waka{padding-left:2em; color:var(--c); line-height:2.1}
+.body.taisho .yak{
+  color:var(--muted); font-size:.95em; padding-left:1em;
+  border-left:3px solid var(--soft);
+}
+
+/* 読み上げ。端末に入っている音声で本文を読む。いま読んでいるところに下地を敷く。 */
+.speak{display:flex; align-items:center; gap:10px; margin:-6px 0 14px; flex-wrap:wrap}
+.speak[hidden]{display:none}
+.sp-rate{color:var(--muted); font-size:.82rem; display:flex; align-items:center; gap:5px}
+.sp-rate select{
+  border:1px solid var(--border); background:var(--surface); color:var(--text);
+  border-radius:8px; padding:4px 8px; font:inherit; font-size:.82rem;
+}
+.body .sp-now{background:var(--mark); border-radius:6px}

@@ -1,0 +1,16 @@
+{
+  "name": "英米文学",
+  "short_name": "英米文学",
+  "description": "英米の文学を原文と日本語訳で読めるアプリ。章ごとに要約と語注つき。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6faf8",
+  "theme_color": "#2f6b5f",
+  "lang": "ja",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
