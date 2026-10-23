@@ -1,13 +1,13 @@
 // オフライン対応。地図は data-jp.js と data-world.js の2本だけなので、まとめて先に保存する。
 // ファイルを更新したら CACHE の番号と、index.html の ?v= の番号を一緒に上げる。
-const CACHE = 'chizu-v2';
+const CACHE = 'chizu-v3';
 const FILES = [
   './',
   'index.html',
-  'style.css?v=2',
-  'app.js?v=2',
-  'data-jp.js?v=2',
-  'data-world.js?v=2',
+  'style.css?v=3',
+  'app.js?v=3',
+  'data-jp.js?v=3',
+  'data-world.js?v=3',
 ];
 
 self.addEventListener('install', (e) => {

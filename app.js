@@ -900,12 +900,20 @@ document.addEventListener('focusout', () => document.body.classList.remove('kb-o
 // 起動
 // =========================================================
 renderStreak();
-// 起動時はいつも「今日」から始める。
-// ただし別アプリ（koten/ や map/）から「◀」で戻ってきたときは、その分野に戻す。
-const backTo = location.hash.replace('#', '');
-if (backTo && FIELDS.some((f) => f.key === backTo && isLinkField(f))) {
-  history.replaceState(null, '', location.pathname + location.search);
-  learn.state = { field: backTo, unit: null, topic: null };
+// 起動時はいつも「今日」から始める。ただし別アプリ（koten/ や map/）から来たときは別で、
+//   #<分野のkey>   「◀」で戻ってきた … その分野を開く
+//   #t=<カードid>  地図から解説カードへ … そのカードを開く
+// どちらもハッシュはすぐ消すので、あとで普通に開き直せば「今日」から始まる。
+const hash = location.hash.replace('#', '');
+const toCard = hash.startsWith('t=') ? hash.slice(2) : '';
+const clearHash = () => history.replaceState(null, '', location.pathname + location.search);
+
+if (toCard && TOPIC_BY_ID.has(toCard)) {
+  clearHash();
+  learn.openTopic(toCard);
+} else if (hash && FIELDS.some((f) => f.key === hash && isLinkField(f))) {
+  clearHash();
+  learn.state = { field: hash, unit: null, topic: null };
   show('learn');
 } else {
   show('today');

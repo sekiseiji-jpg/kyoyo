@@ -11,6 +11,22 @@
   const $ = (id) => document.getElementById(id);
   const MAPS = { jp: window.MAP_JP, world: window.MAP_WORLD };
   const KEY = 'chizu.v1';
+
+  // 一般教養Note の解説カードのうち、その地図と関係の深いもの。
+  // ../#t=<カードid> で本体がそのカードを開く（本体の app.js の起動処理が見ている）
+  const CARDS = {
+    jp: [
+      ['5-8-03', '都道府県'],
+      ['1-4-08', '日本の地形と地域性'],
+      ['1-4-02', 'プレートと地形'],
+    ],
+    world: [
+      ['5-8-02', '国と首都'],
+      ['1-4-03', '気候区分'],
+      ['1-4-07', '民族と宗教の分布'],
+      ['1-4-09', '地図の読み方'],
+    ],
+  };
   const SVGNS = 'http://www.w3.org/2000/svg';
   const QUIZ_N = 20;
 
@@ -431,6 +447,18 @@
   }
 
   // =========================================================
+  // 関係する解説カードへ
+  // =========================================================
+  function drawCards() {
+    const list = CARDS[cur] || [];
+    if (!list.length) { $('cards').innerHTML = ''; return; }
+    $('cards').innerHTML = `
+      <h2>この地図と関係する解説カード</h2>
+      <p class="lead">一般教養Note の読み物に移ります。読み終えたら「学ぶ」から地図へ戻れます。</p>
+      <div class="links">${list.map(([id, t]) => `<a href="../#t=${encodeURIComponent(id)}">${esc(t)}</a>`).join('')}</div>`;
+  }
+
+  // =========================================================
   // 切り替え
   // =========================================================
   function setMap(id, keepHash) {
@@ -441,6 +469,7 @@
     $('bar-title').textContent = data().title;
     document.title = data().title;
     $('foot').textContent = `${data().items.length}${data().unit}／地図の出どころ: ${data().source}。形は簡略化してあります。`;
+    drawCards();
     drawMap();
     setMode(mode);
     if (!keepHash) location.hash = '#' + id;
