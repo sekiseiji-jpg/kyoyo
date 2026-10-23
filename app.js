@@ -896,8 +896,15 @@ document.addEventListener('focusout', () => document.body.classList.remove('kb-o
 // 起動
 // =========================================================
 renderStreak();
-// 起動時はいつも「今日」から始める
-show('today');
+// 起動時はいつも「今日」から始める。
+// ただし本棚（koten/ など）から「◀」で戻ってきたときは、読書コーナーに戻す。
+if (location.hash === '#dokusho') {
+  history.replaceState(null, '', location.pathname + location.search);
+  learn.state = { field: 'dokusho', unit: null, topic: null };
+  show('learn');
+} else {
+  show('today');
+}
 
 if ('serviceWorker' in navigator && window.isSecureContext) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { /* 失敗しても動く */ }));

@@ -886,7 +886,8 @@
     if (q.m) location.hash = '#w=' + q.w;
     else if (q.a) location.hash = '#p=authors';
     else if (q.w || q.p) location.hash = '';
-    else location.href = '../';
+    // 一般教養Note の読書コーナー（本棚の一覧）に戻す。#dokusho は app.js が見ている
+    else location.href = '../#dokusho';
   };
   if ($('top-switch')) {
     $('top-switch').querySelectorAll('[data-top]').forEach(function (b) {
