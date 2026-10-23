@@ -317,10 +317,9 @@ const learn = {
       return `<button class="tile" data-unit="${esc(u.id)}" ${ready ? '' : 'disabled'}>
         <span class="t-name">${esc(u.id)} ${esc(u.name)}</span>
         <span class="t-sub">
-          <span class="pill ${u.pri === 'A' ? '' : 'gray'}">優先${u.pri}</span>
           ${ready
-            ? ` カード${ts.length}枚（読了${readN}）・クイズ${quizOf(u.id).length}問`
-            : ` 準備中（予定 ${plan.cards || 0}枚・${plan.quiz || 0}問）`}
+            ? `カード${ts.length}枚（読了${readN}）・クイズ${quizOf(u.id).length}問`
+            : `準備中（予定 ${plan.cards || 0}枚・${plan.quiz || 0}問）`}
         </span>
       </button>`;
     }).join('');
