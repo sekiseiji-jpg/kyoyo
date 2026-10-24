@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6f4f">
+<meta name="description" content="食事と席次の基本マナーを、図を見ながら身につけるアプリ。">
+<title>マナー</title>
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+
+<header class="bar">
+  <button id="btn-back" class="icon-btn" title="もどる" aria-label="もどる">◀</button>
+  <div class="bar-title"><span class="logo">🍽</span><h1 id="bar-title">マナー</h1></div>
+  <span class="spacer"></span>
+</header>
+
+<main class="wrap">
+
+  <nav class="switch" id="unit-switch" aria-label="単元の切り替え"></nav>
+
+  <nav class="tabs" id="mode-tabs" aria-label="使い方の切り替え">
+    <button class="tab" data-mode="learn">図で見る</button>
+    <button class="tab" data-mode="quiz">クイズ</button>
+  </nav>
+
+  <p class="unit-lead" id="unit-lead"></p>
+
+  <section id="view-learn" class="view"></section>
+  <section id="view-quiz" class="view hidden"></section>
+
+  <section id="cards" class="card cards"></section>
+  <p class="foot" id="foot"></p>
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="data-manner.js?v=1"></script>
+<script src="app.js?v=1"></script>
+</body>
+</html>
