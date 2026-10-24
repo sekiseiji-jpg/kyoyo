@@ -303,10 +303,19 @@
   // =========================================================
   // クイズ
   // =========================================================
-  const targets = () => data().items.filter((i) => (cur === 'world' ? i.quiz : true));
+  /**
+   * 出題できるもの。世界地図は区分で分ける。
+   *   find（地図で探す）… 押せる大きさのある国だけ
+   *   name（名前を当てる）… 小さい国も出す。自動で寄るので答えられる
+   */
+  const targets = (dir) => data().items.filter((i) => {
+    if (cur !== 'world') return true;
+    return dir === 'find' ? i.quiz === 1 : i.quiz >= 1;
+  });
 
   function quizMenu() {
-    const all = targets();
+    const all = targets('name');
+    const findN = targets('find').length;
     const weak = all.filter((i) => isWeak(cur, i.id));
     $('prompt').innerHTML = '';
     $('choices').innerHTML = '';
@@ -316,9 +325,11 @@
       <h2>クイズ</h2>
       <div class="yomi">${data().title}／出題できるのは ${all.length}${data().unit}</div>
       <dl>
-        <dt>地図で探す</dt><dd>名前を見て、その場所を押す</dd>
-        <dt>名前を当てる</dt><dd>光っている場所の名前を四択で選ぶ</dd>
+        <dt>地図で探す</dt><dd>名前を見て、その場所を押す（${findN}${data().unit}）</dd>
+        <dt>名前を当てる</dt><dd>光っている場所の名前を四択で選ぶ（${all.length}${data().unit}）</dd>
       </dl>
+      ${cur === 'world' ? '<p class="note" style="border:none;padding:0;margin:6px 0 0;font-size:12px">'
+        + '小さい国は押しにくいので「地図で探す」には出しません。「名前を当てる」なら自動で寄るので出ます。</p>' : ''}
       <div class="row">
         <button class="primary" data-start="find">地図で探す</button>
         <button class="primary" data-start="name">名前を当てる</button>
@@ -327,14 +338,14 @@
     $('panel').querySelectorAll('[data-start]').forEach((b) => {
       b.onclick = () => {
         const k = b.dataset.start;
-        startQuiz(k === 'weak' ? 'find' : k, k === 'weak');
+        startQuiz(k === 'weak' ? 'name' : k, k === 'weak');
       };
     });
     $('hint').textContent = '';
   }
 
   function startQuiz(dir, weakOnly) {
-    let pool = targets();
+    let pool = targets(dir);
     if (weakOnly) pool = pool.filter((i) => isWeak(cur, i.id));
     pool = shuffle(pool).slice(0, Math.min(QUIZ_N, pool.length));
     quiz = { dir, pool, i: 0, ok: 0, wrong: [], answered: false, cur: null };
@@ -368,7 +379,7 @@
   }
 
   function drawChoices() {
-    const pool = targets().filter((i) => i.id !== quiz.cur.id);
+    const pool = targets(quiz.dir).filter((i) => i.id !== quiz.cur.id);
     const same = shuffle(pool.filter((i) => i.group === quiz.cur.group)).slice(0, 3);
     const rest = shuffle(pool).filter((i) => !same.includes(i)).slice(0, 3 - same.length);
     const list = shuffle([quiz.cur, ...same, ...rest].slice(0, 4));

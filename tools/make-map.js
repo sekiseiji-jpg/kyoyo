@@ -176,7 +176,22 @@ const CAPITAL_FIX = {
   SZ: 'ムババーネ（立法はロバンバ）',
   CL: 'サンティアゴ（国会はバルパライソ）',
   IL: 'エルサレム（国際的には認められておらず、多くの国の大使館はテルアビブ）',
+  // 独立国ではないが、中心都市は出しておく（クイズには出さない）
+  GL: 'ヌーク（デンマークの自治領）',
+  TW: '台北（中華民国の政府所在地）',
 };
+
+// ---------- 国名の表記をそろえる ----------
+// Natural Earth は正式名を持つものと略称を持つものが混ざっている。
+// クイズで並ぶと不自然なので、日本でふつうに使う呼び方にそろえる。
+const NAME_FIX = {
+  MN: 'モンゴル', TH: 'タイ', ML: 'マリ', TW: '台湾',
+};
+
+// ---------- 独立国として出題しないもの ----------
+// 自治領・係争地・承認が割れている地域。地図には出すが、
+// 「国」を答えるクイズには出さない（断定を避けるため）。
+const NOT_SOVEREIGN = new Set(['GL', 'EH', 'TW', 'XK', 'PS', 'HK', 'MO', 'PR', 'NC', 'FK', 'GF', 'SS_disputed']);
 
 const CONT_JA = {
   Asia: 'アジア', Europe: 'ヨーロッパ', Africa: 'アフリカ',
@@ -379,17 +394,25 @@ function buildWorld() {
       w = Math.max(w, c[0] - a[0]); h = Math.max(h, c[1] - a[1]);
     });
 
-    // 首都が無いものは独立国ではない（グリーンランドなど）ので、出題しない
     const capital = capByIso[iso] || '';
+    const pop = p.POP_EST ? Math.round(p.POP_EST / 10000) : 0;   // 万人
+    // 出題の区分。
+    //   1 … 地図を押して答えられる大きさがある（「地図で探す」にも出す）
+    //   2 … 小さいが名前は知られている国（「名前を当てる」だけに出す。自動で寄るので答えられる）
+    //   0 … 出題しない（自治領・係争地・首都が無いもの・小さくて無名のもの）
+    let quiz = 0;
+    if (capital && !NOT_SOVEREIGN.has(iso)) {
+      if (w >= 9 && h >= 9) quiz = 1;
+      else if (pop >= 500) quiz = 2;
+    }
     items.push({
-      id: iso, name: p.NAME_JA || p.NAME, capital,
-      group: cont,
-      pop: p.POP_EST ? Math.round(p.POP_EST / 10000) : 0,   // 万人
+      id: iso, name: NAME_FIX[iso] || p.NAME_JA || p.NAME, capital,
+      group: cont, pop,
       popYear: p.POP_YEAR || 0,
       area: areaKm2(f.geometry),
       spots: WORLD_SPOTS[iso] || '',
       d: shape.d, cx: shape.cx, cy: shape.cy,
-      quiz: w >= 9 && h >= 9 && capital ? 1 : 0,
+      quiz,
     });
   }
   items.sort((a, b) => a.id.localeCompare(b.id));
@@ -435,9 +458,13 @@ write('data-world.js', 'MAP_WORLD', '世界地図', '国', world,
   '正距円筒図法。南極大陸は描いていない。小さすぎて押せない国はクイズに出さない（quiz:0）。'
   + '\n// 人口は Natural Earth の推計（popYear は推計年）、面積は形から計算した概数。名所は主要国のみ。');
 
-const quizN = world.items.filter((i) => i.quiz).length;
+const quizN = world.items.filter((i) => i.quiz === 1).length;
+const quizN2 = world.items.filter((i) => i.quiz === 2).length;
 const noCap = world.items.filter((i) => i.quiz && !i.capital).map((i) => i.name);
-console.log(`\n都道府県 ${jp.items.length} / 国 ${world.items.length}（うちクイズに出す ${quizN}）`);
+const big = world.items.filter((i) => !i.quiz && i.pop >= 1000 && i.capital).map((i) => i.name);
+if (big.length) console.log(`人口1000万人以上なのに出題しない: ${big.join('、')}`);
+console.log(`\n都道府県 ${jp.items.length} / 国 ${world.items.length}`
+  + `（地図で探す ${quizN} / 名前を当てるのみ ${quizN2}）`);
 if (jp.items.length !== 47) { console.error('✕ 都道府県が47件でない'); process.exit(1); }
 if (noCap.length) console.log(`首都が取れなかった国: ${noCap.join('、')}`);
 console.log('\n検査: 問題なし');
