@@ -160,6 +160,24 @@ const WORLD_SPOTS = {
   AU: 'ウルル・グレートバリアリーフ・オペラハウス', NZ: 'ミルフォードサウンド・トンガリロ',
 };
 
+// ---------- 首都が一つに決まらない国（手で持つ） ----------
+// Natural Earth は「事実上の中心」を首都としていることがあり、教科書の答えと食い違う。
+// また南アフリカのように首都が3つある国もある。そういう国はここで上書きする。
+const CAPITAL_FIX = {
+  ZA: 'プレトリア（行政）・ケープタウン（立法）・ブルームフォンテーン（司法）',
+  BO: 'スクレ（憲法上）／ラパス（事実上）',
+  CI: 'ヤムスクロ（多くの機関はアビジャン）',
+  TZ: 'ドドマ（経済の中心はダルエスサラーム）',
+  BJ: 'ポルトノボ（政府の多くはコトヌー）',
+  LK: 'スリジャヤワルダナプラコッテ（経済の中心はコロンボ）',
+  MM: 'ネピドー（2006年にヤンゴンから移転）',
+  NL: 'アムステルダム（政府と王室はハーグ）',
+  MY: 'クアラルンプール（行政はプトラジャヤ）',
+  SZ: 'ムババーネ（立法はロバンバ）',
+  CL: 'サンティアゴ（国会はバルパライソ）',
+  IL: 'エルサレム（国際的には認められておらず、多くの国の大使館はテルアビブ）',
+};
+
 const CONT_JA = {
   Asia: 'アジア', Europe: 'ヨーロッパ', Africa: 'アフリカ',
   'North America': '北アメリカ', 'South America': '南アメリカ', Oceania: 'オセアニア',
@@ -314,13 +332,22 @@ function buildWorld() {
   const g = JSON.parse(fs.readFileSync(SRC_WORLD, 'utf8'));
   const places = JSON.parse(fs.readFileSync(SRC_PLACES, 'utf8'));
 
+  // 首都。FEATURECLA は完全一致で見る。
+  // 「Admin-0 capital alt」は旧都や別都（日本なら京都）なので拾ってはいけない。
+  // 前はここが部分一致で、ファイルの並び順しだいで旧都が勝っていた。
   const capByIso = {};
   places.features
-    .filter((f) => /Admin-0 capital/.test(f.properties.FEATURECLA || ''))
+    .filter((f) => (f.properties.FEATURECLA || '').trim() === 'Admin-0 capital')
     .forEach((f) => {
-      const iso = f.properties.ISO_A2;
-      if (iso && iso !== '-99' && !capByIso[iso]) capByIso[iso] = f.properties.NAME_JA || f.properties.NAME;
+      const p = f.properties;
+      const iso = p.ISO_A2;
+      if (!iso || iso === '-99') return;
+      const cur = capByIso[iso];
+      // 同じ国に複数あるときは人口の多いほうを採る（上書き表があればそちらが勝つ）
+      if (!cur || (p.POP_MAX || 0) > cur.pop) capByIso[iso] = { name: p.NAME_JA || p.NAME, pop: p.POP_MAX || 0 };
     });
+  Object.keys(capByIso).forEach((iso) => { capByIso[iso] = capByIso[iso].name; });
+  Object.entries(CAPITAL_FIX).forEach(([iso, name]) => { capByIso[iso] = name; });
 
   // 正距円筒。南極は帯になるだけなので描かない（1-4 地理のカードのとおり、
   // メルカトルは高緯度がふくらむので使わない）
