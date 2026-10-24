@@ -1,7 +1,7 @@
 // オフライン対応: アプリのファイルはネット優先で取得し、つながらないときはキャッシュを使う
 // 公開ファイルを更新したら CACHE の番号と、index.html の ?v= の番号を一緒に上げる
 // （?v= で index.html と同じ版の CSS/JS を読むので、更新の途中で新旧が混ざらない）
-const CACHE = 'kyoyo-v18';
+const CACHE = 'kyoyo-v19';
 const FILES = [
   './',
   'index.html',
@@ -44,7 +44,7 @@ self.addEventListener('activate', (e) => {
 
 // 分野から開く別アプリ（本棚・地図・マナー）。それぞれが自分の Service Worker と
 // 持っているので、こちらは手を出さない
-const SHELVES = ['/koten/', '/kingendai/', '/eibei/', '/map/', '/manner/', '/rail/'];
+const SHELVES = ['/koten/', '/kingendai/', '/eibei/', '/map/', '/manner/', '/rail/', '/sports/'];
 
 self.addEventListener('fetch', (e) => {
   const req = e.request;

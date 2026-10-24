@@ -228,7 +228,7 @@
     $('bar-title').textContent = u.name;
     document.title = u.name;
     document.querySelector('.bar-title .logo').textContent = u.emoji;
-    $('unit-lead').textContent = u.lead;
+    $('unit-lead').innerHTML = rich(u.lead);
     setMode(mode);
     if (!keepHash) location.hash = '#' + u.id;
   }
