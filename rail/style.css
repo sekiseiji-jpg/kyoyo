@@ -195,14 +195,27 @@ body {
 }
 
 /* ---------- 路線図 ---------- */
-.stage .line { fill: none; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
+/* 線と丸と文字は、拡大しても画面上の大きさが変わらないようにする。
+   --k は app.js が入れる「いまの縮尺」で、寄るほど小さくなる。 */
+.stage svg { --k: 1; }
+.stage .line { fill: none; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round;
+  opacity: .9; vector-effect: non-scaling-stroke; }
 .stage .line.dim { opacity: .18; }
 .stage .line.hi { stroke-width: 9; opacity: 1; }
 
-.stage .dot { fill: var(--surface); stroke: var(--text); stroke-width: 2.5; }
-.stage .dot.junction { stroke-width: 3.5; }
-.stage .label { text-anchor: middle; font-size: 12px; fill: var(--text);
-  paint-order: stroke; stroke: var(--surface); stroke-width: 3.5; stroke-linejoin: round; }
+.stage .dot { fill: var(--surface); stroke: var(--text); stroke-width: 1.4;
+  vector-effect: non-scaling-stroke; r: calc(2.6px * var(--k)); }
+/* 節（終点・乗換駅・曲がり角）は大きく、途中の駅は小さく */
+.stage .st.major .dot { stroke-width: 2.2; r: calc(4.2px * var(--k)); }
+.stage .st.junction .dot { stroke-width: 3; r: calc(5.5px * var(--k)); }
+.stage .hit { r: calc(8px * var(--k)); }
+.stage .label { text-anchor: middle; transform: translateY(calc(2px * (1 - var(--k)))); font-size: calc(11px * var(--k)); fill: var(--text);
+  paint-order: stroke; stroke: var(--surface); stroke-width: 3.5; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke; pointer-events: none; }
+/* 節でない駅の名前は、拡大したときだけ出す（全部出すと重なって読めない） */
+.stage svg:not(.zoomed) .label.sub { display: none; }
+.stage .st.on .label.sub { display: block; }
+.stage .st.major .label { font-size: calc(12px * var(--k)); font-weight: 700; }
 .stage .st { cursor: pointer; }
 .stage .st.dim { opacity: .25; }
 .stage .st.on .dot { fill: var(--primary); stroke: var(--primary); }
@@ -243,3 +256,10 @@ body {
 .tm-min { font-size: 14px; font-weight: 700; color: var(--primary); white-space: nowrap; }
 .tm-line { font-size: 11px; color: var(--muted); border-left: 4px solid var(--c, var(--line)); padding-left: 6px; }
 .tm-memo { font-size: 11px; color: var(--muted); text-align: right; }
+
+/* となりの駅 */
+.nbs { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+.nb-head { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.nb { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; margin-bottom: 4px; }
+.nb-line { font-size: 11px; color: var(--muted); border-left: 4px solid var(--c, var(--line)); padding-left: 6px; }
+.nb-st { font-size: 13px; }

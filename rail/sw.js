@@ -1,12 +1,12 @@
 // オフライン対応。路線図はデータ1本なので、まとめて先に保存する。
 // ファイルを更新したら CACHE の番号と、index.html の ?v= の番号を一緒に上げる。
-const CACHE = 'rail-v3';
+const CACHE = 'rail-v4';
 const FILES = [
   './',
   'index.html',
-  'style.css?v=3',
-  'app.js?v=3',
-  'data-rail.js?v=3',
+  'style.css?v=4',
+  'app.js?v=4',
+  'data-rail.js?v=4',
 ];
 
 self.addEventListener('install', (e) => {

@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2f6f4f">
-<meta name="description" content="東京・大阪・名古屋の路線図。骨格だけを描いて、乗換駅と路線のつながりを覚えるアプリ。">
+<meta name="description" content="東京・大阪・名古屋・福岡・札幌・京都の路線図。主要路線の全駅を載せています。">
 <title>路線図</title>
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
@@ -18,17 +18,10 @@
 
 <main class="wrap">
   <nav class="switch" id="city-switch" aria-label="都市の切り替え"></nav>
-  <nav class="tabs" id="mode-tabs" aria-label="使い方の切り替え">
-    <button class="tab" data-mode="look">見る</button>
-    <button class="tab" data-mode="quiz">クイズ</button>
-  </nav>
-
   <p class="unit-lead" id="city-lead"></p>
-  <div id="prompt" class="prompt"></div>
   <div id="stage" class="stage"></div>
   <div id="legend" class="legend"></div>
   <div id="panel" class="panel"></div>
-  <div id="choices" class="choices"></div>
   <p class="hint" id="hint"></p>
 
   <div class="card times"><h2>主要区間の所要時間</h2><div id="times"></div>
@@ -39,7 +32,7 @@
 
 <div id="toast" role="status" aria-live="polite"></div>
 
-<script src="data-rail.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="data-rail.js?v=4"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

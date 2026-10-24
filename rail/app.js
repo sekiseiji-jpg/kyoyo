@@ -2,35 +2,19 @@
 
 /* =========================================================
    都市の路線図 ― 一般教養Note の地図コーナーから開く別アプリ。
-   線は data-rail.js の「通る駅の並び」から組み立てる。
-     #tokyo  #osaka  #nagoya
-   画面は「見る / クイズ」。クイズはデータから自動で作る。
-   記録はこの端末のブラウザ（localStorage の rail.v1）だけに残る。
+     #tokyo #osaka #nagoya #fukuoka #sapporo #kyoto
+
+   data-rail.js は「路線の全駅の並び」と、節になる駅の座標だけを持つ。
+   座標のない駅は、前後の節のあいだに均等に置く（layout）。
+   駅名は、節と選んでいる駅はいつも出し、それ以外は拡大したときに出す。
    ========================================================= */
 (function () {
   const $ = (id) => document.getElementById(id);
   const DATA = window.MAP_RAIL;
-  const KEY = 'rail.v1';
   const SVGNS = 'http://www.w3.org/2000/svg';
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const rich = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  const shuffle = (a) => {
-    const r = a.slice();
-    for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; }
-    return r;
-  };
-
-  // ---------- 記録 ----------
-  const st = { rec: {} };
-  try { const raw = localStorage.getItem(KEY); if (raw) { const o = JSON.parse(raw); if (o.rec) st.rec = o.rec; } }
-  catch (e) { /* 読めなくても既定値で動く */ }
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* 保存できない環境 */ } };
-  function mark(key, ok) {
-    const r = st.rec[key] || { o: 0, x: 0 };
-    if (ok) r.o++; else r.x++;
-    st.rec[key] = r; save();
-  }
 
   function toast(msg) {
     const el = $('toast');
@@ -39,35 +23,69 @@
     toast.t = setTimeout(() => el.classList.remove('show'), 1800);
   }
 
-  // ---------- いまの状態 ----------
   let cur = DATA.cities[0];
-  let mode = 'look';
   let svg = null;
+  let pos = {};          // 駅id → {x, y, anchor}
   let sel = null;        // 選んでいる駅
   let selLine = null;    // 強調している路線
-  let quiz = null;
 
-  /** その駅を通る路線 */
-  const linesAt = (sid) => cur.lines.filter((l) => l.via.includes(sid));
-  const stationIds = () => Object.keys(cur.stations);
+  const linesAt = (sid) => cur.lines.filter((l) => l.all.includes(sid));
+  /** その路線での隣の駅 */
+  function neighbors(lineId, sid) {
+    const l = cur.lines.find((x) => x.id === lineId);
+    const i = l.all.indexOf(sid);
+    if (i < 0) return [];
+    const n = l.all.length;
+    const prev = i > 0 ? l.all[i - 1] : (l.loop ? l.all[n - 1] : null);
+    const next = i < n - 1 ? l.all[i + 1] : (l.loop ? l.all[0] : null);
+    return [prev, next].filter(Boolean);
+  }
 
   // =========================================================
-  // 図を描く
+  // 駅の位置を決める
+  // =========================================================
+  function layout() {
+    pos = {};
+    Object.entries(cur.stations).forEach(([id, s]) => {
+      if (s.x != null && s.y != null) pos[id] = { x: s.x, y: s.y, anchor: true };
+    });
+    cur.lines.forEach((l) => {
+      const at = [];
+      l.all.forEach((id, i) => { if (pos[id] && pos[id].anchor) at.push(i); });
+      if (!at.length) return;
+      const fill = (ia, ib) => {
+        const a = pos[l.all[ia % l.all.length]];
+        const b = pos[l.all[ib % l.all.length]];
+        for (let j = ia + 1; j < ib; j++) {
+          const id = l.all[j % l.all.length];
+          if (pos[id]) continue;                       // ほかの路線で置かれていればそのまま
+          const t = (j - ia) / (ib - ia);
+          pos[id] = { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+        }
+      };
+      for (let k = 0; k < at.length - 1; k++) fill(at[k], at[k + 1]);
+      // 環状線は、最後の節から最初の節へ戻る区間も埋める
+      if (l.loop) fill(at[at.length - 1], at[0] + l.all.length);
+      // 環状でないとき、両端が節でなければ端まで伸ばせないので、その駅は描かない
+    });
+  }
+
+  // =========================================================
+  // 描く
   // =========================================================
   function draw() {
+    layout();
     const el = document.createElementNS(SVGNS, 'svg');
     el.setAttribute('viewBox', `0 0 ${cur.view[0]} ${cur.view[1]}`);
     el.setAttribute('role', 'img');
     el.setAttribute('aria-label', cur.name + 'の路線図');
 
-    // 路線（駅をつないだ線）
+    // 路線（節をつないだ線）
     cur.lines.forEach((l) => {
-      const pts = l.via.map((s) => cur.stations[s]).filter(Boolean);
+      const pts = l.all.filter((id) => pos[id] && pos[id].anchor).map((id) => pos[id]);
       if (pts.length < 2) return;
-      let d = 'M' + pts.map((p) => `${p.x} ${p.y}`).join('L');
-      if (l.loop) d += 'Z';
       const path = document.createElementNS(SVGNS, 'path');
-      path.setAttribute('d', d);
+      path.setAttribute('d', 'M' + pts.map((p) => `${p.x} ${p.y}`).join('L') + (l.loop ? 'Z' : ''));
       path.setAttribute('stroke', l.color);
       path.setAttribute('class', 'line');
       path.dataset.line = l.id;
@@ -75,23 +93,24 @@
     });
 
     // 駅
-    stationIds().forEach((sid) => {
-      const s = cur.stations[sid];
+    Object.keys(cur.stations).forEach((sid) => {
+      const p = pos[sid];
+      if (!p) return;
       const n = linesAt(sid).length;
       const g = document.createElementNS(SVGNS, 'g');
-      g.setAttribute('class', 'st');
+      g.setAttribute('class', 'st' + (p.anchor ? ' major' : '') + (n > 1 ? ' junction' : ''));
       g.dataset.st = sid;
       const hit = document.createElementNS(SVGNS, 'circle');
-      hit.setAttribute('cx', s.x); hit.setAttribute('cy', s.y); hit.setAttribute('r', 16);
+      hit.setAttribute('cx', p.x); hit.setAttribute('cy', p.y); hit.setAttribute('r', 8);
       hit.setAttribute('class', 'hit');
       const c = document.createElementNS(SVGNS, 'circle');
-      c.setAttribute('cx', s.x); c.setAttribute('cy', s.y);
-      c.setAttribute('r', n > 1 ? 7 : 5);
-      c.setAttribute('class', n > 1 ? 'dot junction' : 'dot');
+      c.setAttribute('cx', p.x); c.setAttribute('cy', p.y);
+      c.setAttribute('r', n > 1 ? 5.5 : (p.anchor ? 4.2 : 2.6));
+      c.setAttribute('class', 'dot');
       const t = document.createElementNS(SVGNS, 'text');
-      t.setAttribute('x', s.x); t.setAttribute('y', s.y - 12);
-      t.setAttribute('class', 'label');
-      t.textContent = s.name;
+      t.setAttribute('x', p.x); t.setAttribute('y', p.y - 10);
+      t.setAttribute('class', 'label' + (p.anchor || n > 1 ? '' : ' sub'));
+      t.textContent = cur.stations[sid].name;
       g.appendChild(hit); g.appendChild(c); g.appendChild(t);
       el.appendChild(g);
     });
@@ -113,25 +132,32 @@
       p.classList.toggle('dim', !!selLine && p.dataset.line !== selLine);
       p.classList.toggle('hi', p.dataset.line === selLine);
     });
+    const onLine = selLine ? cur.lines.find((l) => l.id === selLine).all : null;
     svg.querySelectorAll('.st').forEach((g) => {
       g.classList.toggle('on', g.dataset.st === sel);
-      const onLine = !selLine || cur.lines.find((l) => l.id === selLine).via.includes(g.dataset.st);
-      g.classList.toggle('dim', !!selLine && !onLine);
+      g.classList.toggle('dim', !!onLine && !onLine.includes(g.dataset.st));
     });
   }
 
   // =========================================================
-  // 拡大・移動（地図コーナーと同じ作り）
+  // 拡大・移動
   // =========================================================
   let view = { x: 0, y: 0, w: 0, h: 0 };
-  const applyView = () => svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`);
+  function applyView() {
+    svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`);
+    // 寄るほど図は拡大されるので、駅名と丸の大きさに同じ比率を掛けて
+    // 画面上の見た目を一定に保つ（--k は「いまの縮尺」）
+    svg.style.setProperty('--k', view.w / cur.view[0]);
+    // 十分に寄ったら、途中の駅の名前も出す
+    svg.classList.toggle('zoomed', view.w < cur.view[0] * 0.62);
+  }
 
   function clampView() {
-    const min = cur.view[0] / 6;
+    const min = cur.view[0] / 7;
     view.w = Math.max(min, Math.min(cur.view[0], view.w));
     view.h = view.w * (cur.view[1] / cur.view[0]);
-    view.x = Math.max(-view.w * 0.15, Math.min(cur.view[0] - view.w * 0.85, view.x));
-    view.y = Math.max(-view.h * 0.15, Math.min(cur.view[1] - view.h * 0.85, view.y));
+    view.x = Math.max(-view.w * 0.12, Math.min(cur.view[0] - view.w * 0.88, view.x));
+    view.y = Math.max(-view.h * 0.12, Math.min(cur.view[1] - view.h * 0.88, view.y));
   }
 
   function zoomAt(f, rx, ry) {
@@ -142,6 +168,17 @@
   }
 
   const resetView = () => { view = { x: 0, y: 0, w: cur.view[0], h: cur.view[1] }; applyView(); };
+
+  /** その駅が見えるところまで寄る */
+  function focusStation(sid) {
+    const p = pos[sid];
+    if (!p) return;
+    view.w = cur.view[0] / 3;
+    view.h = view.w * (cur.view[1] / cur.view[0]);
+    view.x = p.x - view.w / 2;
+    view.y = p.y - view.h / 2;
+    clampView(); applyView();
+  }
 
   function zoomButtons() {
     const box = document.createElement('div');
@@ -184,7 +221,7 @@
       if (pts.size === 0) {
         if (moved < view.w / 50) {
           const g = e.target.closest ? e.target.closest('.st') : null;
-          if (g) hit(g.dataset.st);
+          if (g) showStation(g.dataset.st);
         }
         last = null;
       }
@@ -199,41 +236,49 @@
   }
 
   // =========================================================
-  // 見る
+  // 駅と路線
   // =========================================================
-  function hit(sid) {
-    if (mode === 'quiz') return quizTap(sid);
-    sel = sid; paint(); showStation(sid);
-  }
-
   function showStation(sid) {
+    sel = sid; paint();
     const s = cur.stations[sid];
     const ls = linesAt(sid);
+    const near = ls.map((l) => {
+      const ns = neighbors(l.id, sid).map((n) => esc(cur.stations[n].name)).join('　／　');
+      return `<div class="nb"><span class="nb-line" style="--c:${esc(l.color)}">${esc(l.name)}</span>
+        <span class="nb-st">${ns}</span></div>`;
+    }).join('');
     $('panel').innerHTML = `
       <h2>${esc(s.name)}</h2>
       <div class="yomi">${ls.length > 1 ? `${ls.length}路線が乗り入れる乗換駅` : '1路線の駅'}</div>
       <div class="chips">${ls.map((l) =>
-        `<button class="chip" style="--c:${esc(l.color)}" data-line="${esc(l.id)}">${esc(l.name)}</button>`).join('')}</div>`;
-    $('panel').querySelectorAll('[data-line]').forEach((b) => {
-      b.onclick = () => selectLine(b.dataset.line);
-    });
+        `<button class="chip" style="--c:${esc(l.color)}" data-line="${esc(l.id)}">${esc(l.name)}</button>`).join('')}</div>
+      <div class="nbs"><div class="nb-head">となりの駅</div>${near}</div>
+      <div class="row end"><button class="ghost" id="btn-focus">寄って見る</button></div>`;
+    $('panel').querySelectorAll('[data-line]').forEach((b) => { b.onclick = () => selectLine(b.dataset.line); });
+    $('btn-focus').onclick = () => focusStation(sid);
   }
 
   function selectLine(id) {
     selLine = selLine === id ? null : id;
-    paint();
-    drawLegend();
+    sel = null;
+    paint(); drawLegend();
     if (!selLine) { $('panel').innerHTML = ''; return; }
     const l = cur.lines.find((x) => x.id === id);
     $('panel').innerHTML = `
       <h2><span class="swatch" style="background:${esc(l.color)}"></span>${esc(l.name)}</h2>
-      <div class="yomi">${l.via.length}駅${l.loop ? '・環状運転' : ''}${l.min ? `・${l.loop ? '1周' : '全線'}およそ${l.min}分` : ''}</div>
+      <div class="yomi">全${l.all.length}駅${l.loop ? '・環状運転' : ''}${l.min ? `・${l.loop ? '1周' : '全線'}およそ${l.min}分` : ''}</div>
       <p class="note">${rich(l.note)}</p>
-      <div class="chips">${l.via.map((s) =>
+      <div class="chips">${l.all.map((s) =>
         `<button class="chip plain" data-go="${esc(s)}">${esc(cur.stations[s].name)}</button>`).join('')}</div>`;
     $('panel').querySelectorAll('[data-go]').forEach((b) => {
-      b.onclick = () => { sel = b.dataset.go; paint(); showStation(sel); };
+      b.onclick = () => { showStation(b.dataset.go); focusStation(b.dataset.go); $('stage').scrollIntoView({ block: 'center' }); };
     });
+  }
+
+  function drawLegend() {
+    $('legend').innerHTML = cur.lines.map((l) =>
+      `<button class="chip${selLine === l.id ? ' on' : ''}" style="--c:${esc(l.color)}" data-line="${esc(l.id)}">${esc(l.name)}</button>`).join('');
+    $('legend').querySelectorAll('[data-line]').forEach((b) => { b.onclick = () => selectLine(b.dataset.line); });
   }
 
   /** 主要区間の所要時間。押すとその路線を強調する */
@@ -250,151 +295,9 @@
         ${memo ? `<span class="tm-memo">${esc(memo)}</span>` : ''}
       </button>`;
     }).join('');
-    $('times').querySelectorAll('[data-line]').forEach((b2) => {
-      b2.onclick = () => { setMode('look'); selectLine(b2.dataset.line); $('stage').scrollIntoView({ block: 'center' }); };
+    $('times').querySelectorAll('[data-line]').forEach((b) => {
+      b.onclick = () => { selectLine(b.dataset.line); $('stage').scrollIntoView({ block: 'center' }); };
     });
-  }
-
-  function drawLegend() {
-    $('legend').innerHTML = cur.lines.map((l) =>
-      `<button class="chip${selLine === l.id ? ' on' : ''}" style="--c:${esc(l.color)}" data-line="${esc(l.id)}">${esc(l.name)}</button>`).join('');
-    $('legend').querySelectorAll('[data-line]').forEach((b) => { b.onclick = () => selectLine(b.dataset.line); });
-  }
-
-  // =========================================================
-  // クイズ（データから作る）
-  // =========================================================
-  function buildQuiz() {
-    const qs = [];
-    // 乗換駅の場所を当てる
-    stationIds().filter((s) => linesAt(s).length > 1).forEach((s) => {
-      qs.push({ k: 'spot-' + s, type: 'spot', a: s,
-        q: `${cur.stations[s].name}駅はどこか。`,
-        exp: `${cur.stations[s].name}は${linesAt(s).map((l) => l.name).join('・')}が乗り入れる乗換駅。` });
-    });
-    // その路線が通る駅はどれか
-    cur.lines.forEach((l) => {
-      const on = l.via;
-      const off = stationIds().filter((s) => !on.includes(s));
-      if (off.length < 3) return;
-      const ans = on[Math.floor(on.length / 2)];
-      qs.push({ k: 'line-' + l.id, type: 'mc',
-        q: `${l.name}が通る駅はどれか。`,
-        c: shuffle([ans, ...shuffle(off).slice(0, 3)]).map((s) => cur.stations[s].name),
-        aName: cur.stations[ans].name,
-        exp: `${l.name}は ${on.map((s) => cur.stations[s].name).join('→')} と進む。${l.note.replace(/\*\*/g, '')}` });
-    });
-    // 主要区間の所要時間
-    (cur.times || []).forEach((t, i) => {
-      const [lid, a2, b2, min, ] = t;
-      const l = cur.lines.find((x) => x.id === lid);
-      const label = a2 === b2 ? `${cur.stations[a2].name}から${l.name}で1周する` : `${cur.stations[a2].name}から${cur.stations[b2].name}まで${l.name}で行く`;
-      // 紛らわしい選択肢を作る。重複しないように間隔を変えて選ぶ
-      const cand = [min];
-      [Math.round(min * 2), min + 10, Math.max(1, Math.round(min / 2)), min + 5, min + 20, Math.max(1, min - 3)]
-        .forEach((v) => { if (cand.length < 4 && !cand.includes(v)) cand.push(v); });
-      qs.push({ k: 'time-' + i, type: 'mc',
-        q: `${label}と、およそ何分かかるか。`,
-        c: shuffle(cand).map((v) => v + '分'),
-        aName: min + '分',
-        exp: `およそ${min}分。乗車時間の目安で、乗り換えの歩きや待ち時間は含まない。${l.note.replace(/\*\*/g, '')}` });
-    });
-    // 環状運転をするのはどれか
-    const loops = cur.lines.filter((l) => l.loop);
-    if (loops.length && cur.lines.length > loops.length) {
-      qs.push({ k: 'loop', type: 'mc',
-        q: 'この都市で環状運転をする路線はどれか。',
-        c: shuffle(cur.lines.map((l) => l.name)),
-        aName: loops[0].name,
-        exp: `正解は${loops[0].name}。${loops[0].note.replace(/\*\*/g, '')}` });
-    }
-    return qs;
-  }
-
-  function quizMenu() {
-    const pool = buildQuiz();
-    const done = pool.filter((q) => st.rec[cur.id + '-' + q.k]).length;
-    $('prompt').innerHTML = '';
-    $('choices').innerHTML = '';
-    selLine = null; sel = null; paint(); resetView();
-    $('panel').innerHTML = `
-      <h2>クイズ</h2>
-      <div class="yomi">${cur.name}の路線図から${pool.length}問</div>
-      <p class="note">乗換駅の場所を当てる問題と、路線の通る駅を選ぶ問題が出ます。解いたことがあるのは ${done} / ${pool.length} 問。</p>
-      <div class="row"><button class="primary" id="q-start">${pool.length}問を解く</button></div>`;
-    $('q-start').onclick = () => { quiz = { list: shuffle(pool), i: 0, ok: 0, wrong: [] }; nextQ(); };
-    $('hint').textContent = '';
-  }
-
-  function nextQ() {
-    if (quiz.i >= quiz.list.length) return quizResult();
-    const q = quiz.list[quiz.i];
-    const n = quiz.list.length;
-    $('prompt').innerHTML = `
-      <div class="q">${esc(q.q)}</div>
-      <div class="meta">${quiz.i + 1} / ${n}　正解 ${quiz.ok}</div>
-      <div class="bar-wrap"><i style="width:${(quiz.i / n) * 100}%"></i></div>`;
-    $('panel').innerHTML = '';
-    quiz.done = false;
-    selLine = null; sel = null; paint(); resetView();
-    if (q.type === 'spot') {
-      $('choices').innerHTML = '';
-      $('hint').textContent = '図の中の駅を押して答えます。';
-    } else {
-      $('hint').textContent = '';
-      $('choices').innerHTML = q.c.map((c, i) => `<button data-pick="${i}">${esc(c)}</button>`).join('');
-      $('choices').querySelectorAll('[data-pick]').forEach((b) => {
-        b.onclick = () => answer(b.textContent === q.aName, b);
-      });
-    }
-  }
-
-  function quizTap(sid) {
-    const q = quiz && quiz.list[quiz.i];
-    if (!q || q.type !== 'spot' || quiz.done) return;
-    sel = sid; paint();
-    answer(sid === q.a, null);
-  }
-
-  function answer(ok, btn) {
-    if (quiz.done) return;
-    quiz.done = true;
-    const q = quiz.list[quiz.i];
-    mark(cur.id + '-' + q.k, ok);
-    if (ok) quiz.ok++; else quiz.wrong.push(q.q);
-    if (q.type === 'spot') {
-      sel = q.a; paint();
-      const g = svg.querySelector(`.st[data-st="${q.a}"]`);
-      if (g) g.classList.add(ok ? 'ok' : 'bad');
-    } else {
-      $('choices').querySelectorAll('[data-pick]').forEach((b) => {
-        b.disabled = true;
-        if (b.textContent === q.aName) b.classList.add('pick-ok');
-        else if (b === btn) b.classList.add('pick-bad');
-      });
-    }
-    $('panel').innerHTML = `
-      <div class="judge ${ok ? 'ok' : 'bad'}">${ok ? '正解' : 'まちがい'}</div>
-      <p class="note">${rich(q.exp)}</p>
-      <div class="row end"><button class="primary" id="q-next">次へ</button></div>`;
-    $('q-next').onclick = () => { quiz.i++; nextQ(); window.scrollTo(0, 0); };
-  }
-
-  function quizResult() {
-    const n = quiz.list.length;
-    $('prompt').innerHTML = ''; $('choices').innerHTML = ''; $('hint').textContent = '';
-    sel = null; selLine = null; paint(); resetView();
-    $('panel').innerHTML = `
-      <h2>おつかれさま</h2>
-      <div class="yomi">${n}問中 ${quiz.ok}問 正解</div>
-      ${quiz.wrong.length ? `<p class="note">まちがえた：${esc(quiz.wrong.join('　／　'))}</p>` : '<p class="note">全問正解です。</p>'}
-      <div class="row">
-        <button class="primary" id="q-again">もう一度</button>
-        <button class="ghost" id="q-look">図で見直す</button>
-      </div>`;
-    $('q-again').onclick = quizMenu;
-    $('q-look').onclick = () => setMode('look');
-    quiz = null;
   }
 
   // =========================================================
@@ -402,28 +305,19 @@
   // =========================================================
   function setCity(id, keepHash) {
     const c = DATA.cities.find((x) => x.id === id) || DATA.cities[0];
-    cur = c; quiz = null; sel = null; selLine = null;
+    cur = c; sel = null; selLine = null;
     document.querySelectorAll('[data-city]').forEach((b) => b.classList.toggle('on', b.dataset.city === c.id));
     $('bar-title').textContent = c.name + 'の路線図';
     document.title = c.name + 'の路線図';
     document.querySelector('.bar-title .logo').textContent = c.emoji;
     $('city-lead').innerHTML = rich(c.lead);
     $('facts').innerHTML = rich(c.facts);
-    drawTimes();
-    draw();
-    drawLegend();
-    setMode(mode);
+    $('panel').innerHTML = '';
+    const total = c.lines.reduce((set, l) => { l.all.forEach((s) => set.add(s)); return set; }, new Set()).size;
+    $('hint').textContent = `${c.lines.length}路線・${total}駅。駅を押すと乗り入れる路線ととなりの駅が出ます。`
+      + 'つまんで拡大すると、すべての駅名が出ます。';
+    draw(); drawLegend(); drawTimes();
     if (!keepHash) location.hash = '#' + c.id;
-  }
-
-  function setMode(m) {
-    mode = m;
-    document.querySelectorAll('[data-mode]').forEach((b) => b.classList.toggle('on', b.dataset.mode === m));
-    $('prompt').innerHTML = ''; $('choices').innerHTML = ''; $('panel').innerHTML = '';
-    sel = null; selLine = null; quiz = null;
-    paint(); drawLegend(); resetView();
-    if (m === 'quiz') return quizMenu();
-    $('hint').textContent = '駅を押すと乗り入れる路線が出ます。路線の名前を押すとその線だけを強調します。';
   }
 
   // =========================================================
@@ -432,8 +326,7 @@
   $('city-switch').innerHTML = DATA.cities
     .map((c) => `<button class="sw" data-city="${esc(c.id)}">${c.emoji} ${esc(c.name)}</button>`).join('');
   document.querySelectorAll('[data-city]').forEach((b) => { b.onclick = () => setCity(b.dataset.city); });
-  document.querySelectorAll('[data-mode]').forEach((b) => { b.onclick = () => setMode(b.dataset.mode); });
-  $('btn-reset').onclick = () => { resetView(); toast('表示をもとに戻しました'); };
+  $('btn-reset').onclick = () => { sel = null; selLine = null; paint(); drawLegend(); resetView(); $('panel').innerHTML = ''; toast('表示をもとに戻しました'); };
   $('btn-back').onclick = () => { location.href = '../#chizu'; };
   window.addEventListener('hashchange', () => {
     const id = location.hash.replace('#', '');
