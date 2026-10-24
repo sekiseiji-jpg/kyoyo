@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6f4f">
+<meta name="description" content="東京・大阪・名古屋の路線図。骨格だけを描いて、乗換駅と路線のつながりを覚えるアプリ。">
+<title>路線図</title>
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+
+<header class="bar">
+  <button id="btn-back" class="icon-btn" title="もどる" aria-label="もどる">◀</button>
+  <div class="bar-title"><span class="logo">🚃</span><h1 id="bar-title">路線図</h1></div>
+  <button id="btn-reset" class="icon-btn" title="表示をもとに戻す" aria-label="表示をもとに戻す">⟳</button>
+</header>
+
+<main class="wrap">
+  <nav class="switch" id="city-switch" aria-label="都市の切り替え"></nav>
+  <nav class="tabs" id="mode-tabs" aria-label="使い方の切り替え">
+    <button class="tab" data-mode="look">見る</button>
+    <button class="tab" data-mode="quiz">クイズ</button>
+  </nav>
+
+  <p class="unit-lead" id="city-lead"></p>
+  <div id="prompt" class="prompt"></div>
+  <div id="stage" class="stage"></div>
+  <div id="legend" class="legend"></div>
+  <div id="panel" class="panel"></div>
+  <div id="choices" class="choices"></div>
+  <p class="hint" id="hint"></p>
+
+  <div class="card facts"><h2>この街の路線の見方</h2><p id="facts"></p></div>
+  <p class="foot" id="foot"></p>
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="data-rail.js?v=1"></script>
+<script src="app.js?v=1"></script>
+</body>
+</html>
