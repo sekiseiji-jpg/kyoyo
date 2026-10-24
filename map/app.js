@@ -258,18 +258,39 @@
     showInfo(id);
   }
 
+  /** 人口。日本は万人、世界は1万人単位で持っているので、大きければ億に直す */
+  const fmtPop = (man) => {
+    if (!man) return '';
+    if (man >= 10000) return (man / 10000).toFixed(man >= 100000 ? 0 : 1) + '億人';
+    return (man >= 100 ? Math.round(man).toLocaleString() : man) + '万人';
+  };
+  const fmtArea = (km2) => (km2 ? km2.toLocaleString() + ' km²' : '');
+
+  /** その土地が全体の何番目の大きさか（人口・面積の感覚をつかむため） */
+  function rankOf(id, key) {
+    const list = data().items.filter((i) => i[key]);
+    const sorted = list.slice().sort((a, b) => b[key] - a[key]);
+    const i = sorted.findIndex((x) => x.id === id);
+    return i < 0 ? '' : `${i + 1}位 / ${list.length}`;
+  }
+
   function showInfo(id) {
     const it = itemOf(id);
     if (!it) return;
     paint({ on: id });
     const r = recOf(cur, id);
     const tried = r.o + r.x;
+    const jp = cur === 'jp';
     $('panel').innerHTML = `
       <h2>${esc(it.name)}</h2>
       ${it.yomi ? `<div class="yomi">${esc(it.yomi)}</div>` : ''}
       <dl>
-        ${it.capital ? `<dt>${cur === 'jp' ? '県庁所在地' : '首都'}</dt><dd>${esc(it.capital)}</dd>` : ''}
-        <dt>${cur === 'jp' ? '地方' : '州'}</dt><dd>${esc(it.group)}</dd>
+        ${it.capital ? `<dt>${jp ? '県庁所在地' : '首都'}</dt><dd>${esc(it.capital)}</dd>` : ''}
+        <dt>${jp ? '地方' : '州'}</dt><dd>${esc(it.group)}</dd>
+        ${it.pop ? `<dt>人口</dt><dd>${fmtPop(it.pop)}<span class="rank">${rankOf(id, 'pop')}</span></dd>` : ''}
+        ${it.area ? `<dt>面積</dt><dd>${fmtArea(it.area)}<span class="rank">${rankOf(id, 'area')}</span></dd>` : ''}
+        ${it.food ? `<dt>郷土料理</dt><dd>${esc(it.food)}</dd>` : ''}
+        ${it.spots ? `<dt>名所</dt><dd>${esc(it.spots)}</dd>` : ''}
         ${tried ? `<dt>クイズ</dt><dd>${r.o} 正解 / ${r.x} まちがい</dd>` : ''}
       </dl>
       <div class="row end">
@@ -421,21 +442,44 @@
   // =========================================================
   // 一覧
   // =========================================================
+  let listSort = 'group';   // group / pop / area
+
   function drawList() {
     const d = data();
-    const by = {};
-    d.items.forEach((i) => { (by[i.group] = by[i.group] || []).push(i); });
-    $('list-body').innerHTML = Object.keys(by).map((g) => {
-      const rows = by[g].map((i) => {
-        const r = recOf(cur, i.id);
-        const weak = isWeak(cur, i.id);
-        return `<button data-go="${esc(i.id)}">
-          <span class="n">${esc(i.name)}</span>
-          <span class="s${weak ? ' miss' : ''}">${i.capital ? esc(i.capital) : '—'}${r.o + r.x ? `　${r.o}○ ${r.x}×` : ''}</span>
-        </button>`;
-      }).join('');
-      return `<div class="group-head">${esc(g)}（${by[g].length}）</div><div class="list">${rows}</div>`;
-    }).join('');
+    const jp = cur === 'jp';
+    const row = (i) => {
+      const r = recOf(cur, i.id);
+      const weak = isWeak(cur, i.id);
+      const sub = [i.capital || '—', fmtPop(i.pop), fmtArea(i.area)].filter(Boolean).join('　');
+      return `<button data-go="${esc(i.id)}">
+        <span class="n">${esc(i.name)}</span>
+        <span class="s${weak ? ' miss' : ''}">${esc(sub)}${r.o + r.x ? `　${r.o}○ ${r.x}×` : ''}</span>
+        ${i.food ? `<span class="s2">${esc(i.food)}</span>` : ''}
+      </button>`;
+    };
+
+    let body;
+    if (listSort === 'group') {
+      const by = {};
+      d.items.forEach((i) => { (by[i.group] = by[i.group] || []).push(i); });
+      body = Object.keys(by).map((g) =>
+        `<div class="group-head">${esc(g)}（${by[g].length}）</div><div class="list">${by[g].map(row).join('')}</div>`).join('');
+    } else {
+      const sorted = d.items.filter((i) => i[listSort]).sort((a, b) => b[listSort] - a[listSort]);
+      body = `<div class="group-head">${listSort === 'pop' ? '人口' : '面積'}の多い順（${sorted.length}）</div>
+        <div class="list">${sorted.map((i, n) => row(i).replace('<span class="n">', `<span class="n"><em>${n + 1}</em> `)).join('')}</div>`;
+    }
+
+    $('list-body').innerHTML = `
+      <div class="sortbar">
+        <button class="sw${listSort === 'group' ? ' on' : ''}" data-sort="group">${jp ? '地方' : '州'}ごと</button>
+        <button class="sw${listSort === 'pop' ? ' on' : ''}" data-sort="pop">人口順</button>
+        <button class="sw${listSort === 'area' ? ' on' : ''}" data-sort="area">面積順</button>
+      </div>${body}`;
+
+    $('list-body').querySelectorAll('[data-sort]').forEach((b) => {
+      b.onclick = () => { listSort = b.dataset.sort; drawList(); };
+    });
     $('list-body').querySelectorAll('[data-go]').forEach((b) => {
       b.onclick = () => {
         setMode('look');
