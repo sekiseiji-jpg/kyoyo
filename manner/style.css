@@ -77,6 +77,8 @@ body {
   padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--shadow);
 }
 .card h2 { margin: 0 0 4px; font-size: 16px; }
+/* 解説カードから名指しで開かれた図を、しばらく目立たせる */
+.card.focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-weak), var(--shadow); }
 .card .lead { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
 .card .note { font-size: 13px; color: var(--muted); margin: 10px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
 .unit-lead { font-size: 13px; color: var(--muted); margin: 0 0 12px; padding: 0 2px; }
@@ -108,6 +110,10 @@ body {
 .fig-door, .fig-panel { fill: var(--line); }
 .fig-door2 { stroke: var(--line); stroke-width: 4; stroke-dasharray: 10 6; }
 .fig-toko { fill: var(--primary-weak); stroke: var(--primary); stroke-width: 1.5; }
+/* 薄墨。弔事の表書きを薄く見せる */
+.fig-pale { fill: var(--muted); opacity: .45; }
+.fig-pale-t { fill: var(--muted); font-size: 13px; opacity: .55; }
+.fig-pale-t2 { fill: var(--muted); font-size: 11px; opacity: .55; }
 
 .hit { fill: transparent; }
 .hot { cursor: pointer; }

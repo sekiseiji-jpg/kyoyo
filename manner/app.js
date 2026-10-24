@@ -244,6 +244,32 @@
   // =========================================================
   // 起動
   // =========================================================
+  /** #washoku&f=haizen → {unit:'washoku', fig:'haizen'} */
+  function parseHash() {
+    const parts = location.hash.replace('#', '').split('&');
+    const q = { unit: parts[0] };
+    parts.slice(1).forEach((p) => { const [k, v] = p.split('='); if (k === 'f') q.fig = decodeURIComponent(v || ''); });
+    return q;
+  }
+
+  /** 解説カードなどから名指しで開かれた図へ寄る */
+  function focusFig(figId) {
+    if (!figId) return;
+    setMode('learn');
+    const card = document.querySelector(`[data-fig="${CSS.escape(figId)}"]`);
+    if (!card) return;
+    card.classList.add('focus');
+    card.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    setTimeout(() => card.classList.remove('focus'), 2400);
+  }
+
+  function openHash(first) {
+    const q = parseHash();
+    const u = DATA.units.find((x) => x.id === q.unit);
+    if (first || (u && u.id !== cur.id)) setUnit(u ? u.id : DATA.units[0].id, true);
+    if (q.fig) focusFig(q.fig);
+  }
+
   $('unit-switch').innerHTML = DATA.units
     .map((u) => `<button class="sw" data-unit="${esc(u.id)}">${u.emoji} ${esc(u.short || u.name)}</button>`).join('');
   document.querySelectorAll('[data-unit]').forEach((b) => { b.onclick = () => setUnit(b.dataset.unit); });
@@ -253,14 +279,11 @@
     // 一般教養Note のマナー分野に戻す。#manner は本体の app.js が見ている
     location.href = '../#manner';
   };
-  window.addEventListener('hashchange', () => {
-    const id = location.hash.replace('#', '');
-    if (DATA.units.some((u) => u.id === id) && id !== cur.id) setUnit(id, true);
-  });
+  window.addEventListener('hashchange', () => openHash(false));
 
   $('foot').textContent = DATA.source;
   drawCards();
-  setUnit(location.hash.replace('#', '') || DATA.units[0].id, true);
+  openHash(true);
 
   if ('serviceWorker' in navigator && window.isSecureContext) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { /* 失敗しても動く */ }));

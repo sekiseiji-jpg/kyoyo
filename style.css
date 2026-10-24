@@ -181,6 +181,15 @@ a.tile { display: block; text-decoration: none; color: var(--text); }
 }
 .asof { font-size: 11px; color: var(--muted); margin-top: 10px; }
 
+/* カードから別アプリの図へ飛ぶリンク（マナーコーナーなど） */
+.fig-links { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; }
+.fig-link {
+  background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
+  border-radius: 999px; padding: 4px 12px; font-size: 12px; text-decoration: none;
+}
+.fig-link::before { content: '🖼 '; }
+.fig-link:hover { border-color: var(--primary); color: var(--primary); }
+
 /* ---------- クイズ ---------- */
 .q-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 13px; color: var(--muted); }
 .q-bar { height: 5px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin-bottom: 14px; }

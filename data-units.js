@@ -123,7 +123,7 @@ window.FIELDS = [
     color: '#b5725a',
     kind: 'manner',
     desc: '食事と席次の作法を図で覚えます。図の中を押すと説明が出て、その図のままクイズになります。',
-    meta: '3つの単元 ／ 図15枚・クイズ25問',
+    meta: '4つの単元 ／ 図20枚・クイズ33問',
     units: [
       { id: '8-1', name: '洋食のマナー', href: 'manner/#yoshoku',
         sub: '図5枚 ／ テーブルセッティング・使う順・ナイフとフォークの合図・ナプキン・グラス' },
@@ -131,9 +131,27 @@ window.FIELDS = [
         sub: '図5枚 ／ 一汁三菜の配膳・箸の持ち方・嫌い箸・器の扱い・会席の流れ' },
       { id: '8-3', name: '席次と立ち居ふるまい', href: 'manner/#sekiji',
         sub: '図5枚 ／ 応接室・会議室・和室・車・エレベーター' },
+      { id: '8-4', name: '慶弔ののし袋', href: 'manner/#keicho',
+        sub: '図5枚 ／ 水引・袋の折り返し・袱紗・表書きと墨・焼香' },
     ],
   },
 ];
+
+// 解説カードから開く図。カードid → [[リンク先, 表示名], …]
+// マナーコーナーの図は manner/#<単元>&f=<図id> で名指しできる。
+// 文章で説明しているものに図があるときだけ結ぶ。無理に全カードへ付けない。
+window.CARD_LINKS = {
+  '5-1-01': [['manner/#sekiji&f=ousetsu', '席次の図']],
+  '5-1-05': [['manner/#sekiji&f=ousetsu', '応接室'], ['manner/#sekiji&f=kaigi', '会議室'],
+    ['manner/#sekiji&f=kuruma', '車'], ['manner/#sekiji&f=elevator', 'エレベーター']],
+  '5-2-02': [['manner/#keicho&f=mizuhiki', '水引の結び方'], ['manner/#keicho&f=orikaeshi', '袋の折り返し'],
+    ['manner/#keicho&f=fukusa', '袱紗の包み方']],
+  '5-2-03': [['manner/#keicho&f=omotegaki', '表書きと墨の濃さ'], ['manner/#keicho&f=shoukou', '焼香の手順'],
+    ['manner/#keicho&f=fukusa', '袱紗の包み方']],
+  '5-2-04': [['manner/#keicho&f=omotegaki', '表書きと墨の濃さ']],
+  '5-2-05': [['manner/#keicho&f=mizuhiki', '水引の結び方'], ['manner/#keicho&f=omotegaki', '表書きと墨の濃さ']],
+  '5-2-10': [['manner/#keicho&f=mizuhiki', '水引の結び方'], ['manner/#keicho&f=orikaeshi', '袋の折り返し']],
+};
 
 // 単元あたりの目標量。読書コーナーを除く全単元で共通（カード10枚・クイズ30問 = 400枚・1200問）
 window.UNIT_PLAN = { cards: 10, quiz: 30 };

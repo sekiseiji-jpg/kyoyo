@@ -14,6 +14,7 @@ const PRI_PLAN = window.PRI_PLAN || {};
 const TOPICS = window.TOPICS || [];
 const QUIZ = window.QUIZ || [];
 const TERMS = window.TERMS || {};
+const CARD_LINKS = window.CARD_LINKS || {};   // カードid → 別アプリの図へのリンク
 
 // ---------- 保存 ----------
 const store = {
@@ -379,6 +380,15 @@ const learn = {
       </div>`;
   },
 
+  /** そのカードの内容に図があるとき、マナーコーナーなどの図へのリンクを出す */
+  figLinks(id) {
+    const list = CARD_LINKS[id];
+    if (!list || !list.length) return '';
+    const links = list.map(([href, label]) =>
+      `<a class="fig-link" href="${esc(href)}">${esc(label)}</a>`).join('');
+    return `<div class="fig-links"><span class="muted small">図で見る</span>${links}</div>`;
+  },
+
   viewTopic() {
     const t = TOPIC_BY_ID.get(this.state.topic);
     const ts = topicsOf(t.unit);
@@ -397,6 +407,7 @@ const learn = {
         <h2>${esc(t.title)}</h2>
         <div class="read-body">${paras}</div>
         ${keys ? `<div class="key-row">${keys}</div>` : ''}
+        ${this.figLinks(t.id)}
         ${t.asof ? `<div class="asof">数値の確認日: ${esc(t.asof)}</div>` : ''}
         <div class="row" style="margin-top:14px">
           <button class="ghost" data-move="-1" ${i === 0 ? 'disabled' : ''}>← 前</button>
