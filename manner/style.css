@@ -194,3 +194,6 @@ body {
   .choices button { min-height: 48px; }
   .choices.img { grid-template-columns: 1fr; }
 }
+
+/* 表の罫線（香典の金額の目安など） */
+.fig-sep2 { stroke: var(--line); stroke-width: 1; opacity: .6; }
