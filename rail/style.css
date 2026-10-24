@@ -68,6 +68,9 @@ body {
 
 /* ---------- 切り替え ---------- */
 .switch, .tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+/* 都市が増えたので折り返す。1行に3つ以上は入るようにしておく */
+#city-switch { flex-wrap: wrap; }
+#city-switch .sw { flex: 1 1 28%; }
 .sw, .tab {
   flex: 1; padding: 8px 4px; border: 1px solid var(--line); border-radius: 10px;
   background: var(--surface); color: var(--muted);

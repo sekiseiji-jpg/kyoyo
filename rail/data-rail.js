@@ -130,5 +130,117 @@ window.MAP_RAIL = {
       facts: '名城線は**地下鉄で唯一の環状運転**をする路線で、山手線や大阪環状線と同じように回り続ける。'
         + '名古屋駅と栄が街の二つの核で、その間を東山線と桜通線が結んでいる。',
     },
+
+    // =========================================================
+    {
+      id: 'fukuoka', name: '福岡', emoji: '🏮',
+      lead: '**空港が街のすぐ隣にある。** 福岡空港から博多まで地下鉄で2駅、約5分。これだけ近い大都市は世界でもめずらしい。',
+      view: [380, 300],
+      stations: {
+        airport: { name: '福岡空港', x: 334, y: 96 },
+        hakata: { name: '博多', x: 246, y: 120 },
+        gion: { name: '祇園', x: 214, y: 112 },
+        nakasu: { name: '中洲川端', x: 170, y: 100 },
+        tenjin: { name: '天神', x: 126, y: 100 },
+        ohori: { name: '大濠公園', x: 78, y: 112 },
+        meinohama: { name: '姪浜', x: 32, y: 128 },
+        gofukumachi: { name: '呉服町', x: 184, y: 62 },
+        kaizuka: { name: '貝塚', x: 212, y: 28 },
+        kushida: { name: '櫛田神社前', x: 196, y: 162 },
+        tenjinminami: { name: '天神南', x: 134, y: 160 },
+        yakuin: { name: '薬院', x: 120, y: 200 },
+        ropponmatsu: { name: '六本松', x: 72, y: 222 },
+        hashimoto: { name: '橋本', x: 26, y: 250 },
+      },
+      lines: [
+        { id: 'kuko', name: '地下鉄 空港線', color: '#f08300',
+          via: ['airport', 'hakata', 'gion', 'nakasu', 'tenjin', 'ohori', 'meinohama'],
+          note: '**福岡空港と博多・天神を結ぶ**。空港から博多まで約5分、天神まで約11分。'
+            + '街の中心に空港が近いことが、福岡の大きな特徴になっている。' },
+        { id: 'hakozaki', name: '地下鉄 箱崎線', color: '#0097d9',
+          via: ['nakasu', 'gofukumachi', 'kaizuka'],
+          note: '中洲川端から北東へ伸びる短い線。空港線と中洲川端で接続し、直通運転もしている。' },
+        { id: 'nanakuma', name: '地下鉄 七隈線', color: '#00a73c',
+          via: ['hakata', 'kushida', 'tenjinminami', 'yakuin', 'ropponmatsu', 'hashimoto'],
+          note: '**2023年に博多まで延伸した**。それまでは天神南止まりで博多へ直接行けず、'
+            + '乗り換えが要ることが不便とされていた。' },
+      ],
+      quizPool: ['kuko', 'hakozaki', 'nanakuma'],
+      facts: '博多と天神が街の二つの核で、その間は地下鉄で2駅。**「博多」はJRの駅名、「天神」は繁華街の名**で、'
+        + '同じ市内の別の場所である。天神と天神南は乗り換えに地下通路を歩く別の駅なので、間違えやすい。',
+    },
+
+    // =========================================================
+    {
+      id: 'sapporo', name: '札幌', emoji: '❄️',
+      lead: '**3本の地下鉄がすべて大通で交わる。** 大通を中心に、南北・東西・東豊が放射状に伸びる分かりやすい形。',
+      view: [380, 330],
+      stations: {
+        asabu: { name: '麻生', x: 180, y: 28 },
+        sapporo: { name: 'さっぽろ', x: 186, y: 110 },
+        odori: { name: '大通', x: 186, y: 160 },
+        susukino: { name: 'すすきの', x: 168, y: 200 },
+        makomanai: { name: '真駒内', x: 150, y: 300 },
+        miyanosawa: { name: '宮の沢', x: 28, y: 160 },
+        kotoni: { name: '琴似', x: 76, y: 160 },
+        maruyama: { name: '円山公園', x: 126, y: 160 },
+        buscenter: { name: 'バスセンター前', x: 252, y: 160 },
+        shinsapporo: { name: '新さっぽろ', x: 350, y: 160 },
+        sakaemachi: { name: '栄町', x: 250, y: 28 },
+        hosui: { name: '豊水すすきの', x: 216, y: 200 },
+        fukuzumi: { name: '福住', x: 268, y: 300 },
+      },
+      lines: [
+        { id: 'namboku', name: '地下鉄 南北線', color: '#00a040',
+          via: ['asabu', 'sapporo', 'odori', 'susukino', 'makomanai'],
+          note: '**札幌で最初の地下鉄**（1971年、札幌オリンピックの前年）。'
+            + 'ゴムタイヤで走る案内軌条式で、雪の多い土地に合わせた作りになっている。' },
+        { id: 'tozai', name: '地下鉄 東西線', color: '#f39800',
+          via: ['miyanosawa', 'kotoni', 'maruyama', 'odori', 'buscenter', 'shinsapporo'],
+          note: '街を**東西に貫く**いちばん長い線。大通で南北線と東豊線に乗り換えられる。' },
+        { id: 'toho', name: '地下鉄 東豊線', color: '#0092d2',
+          via: ['sakaemachi', 'sapporo', 'odori', 'hosui', 'fukuzumi'],
+          note: '3本のうち最も新しい（1988年）。南北線と並んで走る区間があり、'
+            + 'さっぽろ・大通の2駅で接続する。' },
+      ],
+      quizPool: ['namboku', 'tozai', 'toho'],
+      facts: '**「さっぽろ」（地下鉄）と「札幌」（JR）は表記が違う**が同じ場所にある。'
+        + 'すすきのと豊水すすきのも別の駅で、歩いて移動する。'
+        + '札幌の地下鉄は3本ともゴムタイヤ式で、鉄のレールの上を走らない。雪と寒さへの備えである。',
+    },
+
+    // =========================================================
+    {
+      id: 'kyoto', name: '京都', emoji: '⛩',
+      lead: '**地下鉄は2本だけ**で、烏丸御池で十字に交わる。碁盤の目の街なので「南北＝烏丸線、東西＝東西線」で覚えられる。',
+      view: [380, 300],
+      stations: {
+        kokusai: { name: '国際会館', x: 196, y: 24 },
+        kitaoji: { name: '北大路', x: 190, y: 72 },
+        imadegawa: { name: '今出川', x: 188, y: 110 },
+        karasuma: { name: '烏丸御池', x: 186, y: 150 },
+        shijo: { name: '四条', x: 184, y: 196 },
+        kyoto: { name: '京都', x: 182, y: 240 },
+        takeda: { name: '竹田', x: 180, y: 284 },
+        uzumasa: { name: '太秦天神川', x: 34, y: 150 },
+        nijo: { name: '二条', x: 110, y: 150 },
+        sanjo: { name: '三条京阪', x: 250, y: 150 },
+        yamashina: { name: '山科', x: 316, y: 164 },
+        rokujizo: { name: '六地蔵', x: 348, y: 240 },
+      },
+      lines: [
+        { id: 'karasuma', name: '地下鉄 烏丸線', color: '#009944',
+          via: ['kokusai', 'kitaoji', 'imadegawa', 'karasuma', 'shijo', 'kyoto', 'takeda'],
+          note: '**南北に貫く**線。京都駅と四条（繁華街）、今出川（大学の多い一帯）を結ぶ。'
+            + '竹田から近鉄に乗り入れて奈良方面へ直通する。' },
+        { id: 'tozai', name: '地下鉄 東西線', color: '#ea5532',
+          via: ['uzumasa', 'nijo', 'karasuma', 'sanjo', 'yamashina', 'rokujizo'],
+          note: '**東西に貫く**線。烏丸御池で烏丸線と交わり、三条京阪で京阪、山科でJRに接続する。' },
+      ],
+      quizPool: ['karasuma', 'tozai'],
+      facts: '**京都の地下鉄は2本だけで、観光地の多くは駅から離れている。** 清水寺も金閣寺も最寄りの地下鉄駅がなく、'
+        + '市バスが移動の主役になる。碁盤の目の街なので、通りの名前（烏丸・四条・御池）がそのまま駅名になっているものが多く、'
+        + '地図と駅名が対応して覚えやすい。',
+    },
   ],
 };
