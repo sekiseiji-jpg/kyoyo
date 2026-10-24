@@ -10,6 +10,10 @@
 
    color は各社が使っている色に寄せてある（丸ノ内線は赤、銀座線はオレンジ…）。
    色そのものが覚える手がかりになるため。
+
+   min（路線の端から端まで）と times（主要区間）は**乗車時間の目安**で、
+   乗り換えの歩きや待ち時間は含まない。時刻表や種別で変わるので、分単位で合わせていない。
+   times は [路線id, 出発駅id, 到着駅id, 分, 補足] の並び。
 */
 
 window.MAP_RAIL = {
@@ -42,16 +46,28 @@ window.MAP_RAIL = {
       lines: [
         { id: 'yamanote', name: 'JR山手線', color: '#9acd32', loop: true,
           via: ['ikebukuro', 'ueno', 'akihabara', 'tokyo', 'shimbashi', 'shinagawa', 'shibuya', 'shinjuku'],
+          min: 60,
           note: '**環状運転をする**。1周約34.5km、約1時間。東京の主要なターミナルをつないでいて、ほかの路線はたいていこの環のどこかに接続する。' },
         { id: 'chuo', name: 'JR中央線（快速）', color: '#f15a22',
           via: ['shinjuku', 'yotsuya', 'ochanomizu', 'tokyo'],
+          min: 14,
           note: '環を**東西に横切る**。新宿と東京を最短で結ぶので、山手線で遠回りするより速いことが多い。' },
         { id: 'ginza', name: '地下鉄 銀座線', color: '#ff9500',
           via: ['shibuya', 'omotesando', 'akasaka', 'shimbashi', 'ginza', 'nihombashi', 'ueno', 'asakusa'],
+          min: 32,
           note: '**日本初の地下鉄**（1927年、上野—浅草）。渋谷から浅草まで、環の内側を南西から北東へ斜めに貫く。' },
         { id: 'marunouchi', name: '地下鉄 丸ノ内線', color: '#e60012',
           via: ['ikebukuro', 'korakuen', 'tokyo', 'ginza', 'kasumigaseki', 'akasaka', 'yotsuya', 'shinjuku'],
+          min: 32,
           note: '池袋から東京・銀座を通って新宿へ戻る**U字**。環の内側を大きく回るので、地図で見ると遠回りに見える。' },
+      ],
+      times: [
+        ['yamanote', 'ikebukuro', 'ikebukuro', 60, ''],
+        ['chuo', 'shinjuku', 'tokyo', 14, '快速'],
+        ['yamanote', 'shinjuku', 'shibuya', 7, ''],
+        ['yamanote', 'tokyo', 'shinagawa', 12, ''],
+        ['ginza', 'shibuya', 'asakusa', 32, '全線'],
+        ['marunouchi', 'ikebukuro', 'tokyo', 17, ''],
       ],
       quizPool: ['yamanote', 'chuo', 'ginza', 'marunouchi'],
       facts: '山手線の環の中に、政治（霞ケ関）・経済（丸の内）・商業（銀座・新宿・渋谷）が収まっている。'
@@ -82,13 +98,23 @@ window.MAP_RAIL = {
       lines: [
         { id: 'loop', name: 'JR大阪環状線', color: '#f8b500', loop: true,
           via: ['osaka', 'kyobashi', 'tsuruhashi', 'tennoji', 'shinimamiya', 'bentencho', 'nishikujo'],
+          min: 40,
           note: '**環状運転をする**。1周約21.7km、約40分。山手線より小さい。環の中に大阪の中心部が収まっている。' },
         { id: 'midosuji', name: '地下鉄 御堂筋線', color: '#e5171f',
           via: ['shinosaka', 'osaka', 'yodoyabashi', 'hommachi', 'shinsaibashi', 'namba', 'tennoji'],
+          min: 20,
           note: '大阪の**大動脈**。新大阪・梅田（キタ）・心斎橋・難波（ミナミ）・天王寺を一直線に結ぶ。迷ったらこの線。' },
         { id: 'chuo', name: '地下鉄 中央線', color: '#019a66',
           via: ['bentencho', 'hommachi', 'tanimachi4', 'morinomiya'],
+          min: 11,
           note: '環の中を**東西に横切る**。御堂筋線とは本町で交わる。' },
+      ],
+      times: [
+        ['loop', 'osaka', 'osaka', 40, ''],
+        ['midosuji', 'osaka', 'namba', 8, ''],
+        ['midosuji', 'shinosaka', 'osaka', 4, ''],
+        ['midosuji', 'osaka', 'tennoji', 16, ''],
+        ['chuo', 'bentencho', 'hommachi', 6, ''],
       ],
       quizPool: ['loop', 'midosuji', 'chuo'],
       facts: '大阪では北の梅田を「キタ」、南の難波を「ミナミ」と呼ぶ。この2つを結ぶのが御堂筋線で、'
@@ -118,13 +144,22 @@ window.MAP_RAIL = {
       lines: [
         { id: 'higashiyama', name: '地下鉄 東山線', color: '#ffb100',
           via: ['nagoya', 'fushimi', 'sakae', 'chikusa', 'hongo'],
+          min: 14,
           note: '名古屋駅と栄を結ぶ**いちばん使う線**。名古屋で最初にできた地下鉄（1957年）。' },
         { id: 'meijo', name: '地下鉄 名城線', color: '#9100a0', loop: true,
           via: ['sakae', 'hisayaodori', 'shiyakusho', 'ozone', 'hongo', 'yagoto', 'kanayama', 'higashibetsuin'],
+          min: 48,
           note: '**地下鉄では日本で唯一の環状運転**。右回りと左回りがあり、「右回り」「左回り」で案内される。' },
         { id: 'sakuradori', name: '地下鉄 桜通線', color: '#c80063',
           via: ['nagoya', 'marunouchi', 'hisayaodori', 'imaike'],
+          min: 11,
           note: '東山線の混雑を分ける目的で作られた。名古屋駅から東山線と並んで東へ向かう。' },
+      ],
+      times: [
+        ['higashiyama', 'nagoya', 'sakae', 5, ''],
+        ['meijo', 'sakae', 'sakae', 48, ''],
+        ['higashiyama', 'nagoya', 'chikusa', 9, ''],
+        ['meijo', 'sakae', 'kanayama', 8, ''],
       ],
       quizPool: ['higashiyama', 'meijo', 'sakuradori'],
       facts: '名城線は**地下鉄で唯一の環状運転**をする路線で、山手線や大阪環状線と同じように回り続ける。'
@@ -155,15 +190,24 @@ window.MAP_RAIL = {
       lines: [
         { id: 'kuko', name: '地下鉄 空港線', color: '#f08300',
           via: ['airport', 'hakata', 'gion', 'nakasu', 'tenjin', 'ohori', 'meinohama'],
+          min: 23,
           note: '**福岡空港と博多・天神を結ぶ**。空港から博多まで約5分、天神まで約11分。'
             + '街の中心に空港が近いことが、福岡の大きな特徴になっている。' },
         { id: 'hakozaki', name: '地下鉄 箱崎線', color: '#0097d9',
           via: ['nakasu', 'gofukumachi', 'kaizuka'],
+          min: 8,
           note: '中洲川端から北東へ伸びる短い線。空港線と中洲川端で接続し、直通運転もしている。' },
         { id: 'nanakuma', name: '地下鉄 七隈線', color: '#00a73c',
           via: ['hakata', 'kushida', 'tenjinminami', 'yakuin', 'ropponmatsu', 'hashimoto'],
+          min: 24,
           note: '**2023年に博多まで延伸した**。それまでは天神南止まりで博多へ直接行けず、'
             + '乗り換えが要ることが不便とされていた。' },
+      ],
+      times: [
+        ['kuko', 'airport', 'hakata', 5, ''],
+        ['kuko', 'airport', 'tenjin', 11, ''],
+        ['kuko', 'hakata', 'tenjin', 5, ''],
+        ['nanakuma', 'hakata', 'tenjinminami', 4, '2023年の延伸でできた'],
       ],
       quizPool: ['kuko', 'hakozaki', 'nanakuma'],
       facts: '博多と天神が街の二つの核で、その間は地下鉄で2駅。**「博多」はJRの駅名、「天神」は繁華街の名**で、'
@@ -193,15 +237,24 @@ window.MAP_RAIL = {
       lines: [
         { id: 'namboku', name: '地下鉄 南北線', color: '#00a040',
           via: ['asabu', 'sapporo', 'odori', 'susukino', 'makomanai'],
+          min: 28,
           note: '**札幌で最初の地下鉄**（1971年、札幌オリンピックの前年）。'
             + 'ゴムタイヤで走る案内軌条式で、雪の多い土地に合わせた作りになっている。' },
         { id: 'tozai', name: '地下鉄 東西線', color: '#f39800',
           via: ['miyanosawa', 'kotoni', 'maruyama', 'odori', 'buscenter', 'shinsapporo'],
+          min: 33,
           note: '街を**東西に貫く**いちばん長い線。大通で南北線と東豊線に乗り換えられる。' },
         { id: 'toho', name: '地下鉄 東豊線', color: '#0092d2',
           via: ['sakaemachi', 'sapporo', 'odori', 'hosui', 'fukuzumi'],
+          min: 31,
           note: '3本のうち最も新しい（1988年）。南北線と並んで走る区間があり、'
             + 'さっぽろ・大通の2駅で接続する。' },
+      ],
+      times: [
+        ['namboku', 'sapporo', 'odori', 1, '隣の駅'],
+        ['namboku', 'odori', 'susukino', 1, '隣の駅'],
+        ['namboku', 'sapporo', 'makomanai', 19, ''],
+        ['tozai', 'odori', 'shinsapporo', 19, ''],
       ],
       quizPool: ['namboku', 'tozai', 'toho'],
       facts: '**「さっぽろ」（地下鉄）と「札幌」（JR）は表記が違う**が同じ場所にある。'
@@ -231,11 +284,19 @@ window.MAP_RAIL = {
       lines: [
         { id: 'karasuma', name: '地下鉄 烏丸線', color: '#009944',
           via: ['kokusai', 'kitaoji', 'imadegawa', 'karasuma', 'shijo', 'kyoto', 'takeda'],
+          min: 27,
           note: '**南北に貫く**線。京都駅と四条（繁華街）、今出川（大学の多い一帯）を結ぶ。'
             + '竹田から近鉄に乗り入れて奈良方面へ直通する。' },
         { id: 'tozai', name: '地下鉄 東西線', color: '#ea5532',
           via: ['uzumasa', 'nijo', 'karasuma', 'sanjo', 'yamashina', 'rokujizo'],
+          min: 29,
           note: '**東西に貫く**線。烏丸御池で烏丸線と交わり、三条京阪で京阪、山科でJRに接続する。' },
+      ],
+      times: [
+        ['karasuma', 'kyoto', 'shijo', 2, '隣の駅'],
+        ['karasuma', 'kyoto', 'karasuma', 4, ''],
+        ['karasuma', 'kyoto', 'kokusai', 20, ''],
+        ['tozai', 'karasuma', 'sanjo', 3, ''],
       ],
       quizPool: ['karasuma', 'tozai'],
       facts: '**京都の地下鉄は2本だけで、観光地の多くは駅から離れている。** 清水寺も金閣寺も最寄りの地下鉄駅がなく、'

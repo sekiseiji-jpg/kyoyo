@@ -226,3 +226,20 @@ body {
 .card.facts h2 { margin: 0 0 4px; font-size: 14px; }
 .card.facts p { margin: 0; font-size: 13px; color: var(--muted); }
 .unit-lead { font-size: 13px; color: var(--muted); margin: 0 0 10px; padding: 0 2px; }
+
+/* ---------- 主要区間の所要時間 ---------- */
+.card.times { margin-top: 16px; }
+.card.times h2 { margin: 0 0 8px; font-size: 14px; }
+.card.times .small-note { font-size: 11px; color: var(--muted); margin: 8px 0 0; }
+#times { display: grid; gap: 6px; }
+.timerow {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: baseline;
+  width: 100%; text-align: left; cursor: pointer; font-family: inherit;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+}
+.timerow:hover { background: var(--surface-2); }
+.tm-route { font-size: 14px; font-weight: 700; }
+.tm-min { font-size: 14px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+.tm-line { font-size: 11px; color: var(--muted); border-left: 4px solid var(--c, var(--line)); padding-left: 6px; }
+.tm-memo { font-size: 11px; color: var(--muted); text-align: right; }

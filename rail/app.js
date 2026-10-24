@@ -227,12 +227,31 @@
     const l = cur.lines.find((x) => x.id === id);
     $('panel').innerHTML = `
       <h2><span class="swatch" style="background:${esc(l.color)}"></span>${esc(l.name)}</h2>
-      <div class="yomi">${l.via.length}駅${l.loop ? '・環状運転' : ''}</div>
+      <div class="yomi">${l.via.length}駅${l.loop ? '・環状運転' : ''}${l.min ? `・${l.loop ? '1周' : '全線'}およそ${l.min}分` : ''}</div>
       <p class="note">${rich(l.note)}</p>
       <div class="chips">${l.via.map((s) =>
         `<button class="chip plain" data-go="${esc(s)}">${esc(cur.stations[s].name)}</button>`).join('')}</div>`;
     $('panel').querySelectorAll('[data-go]').forEach((b) => {
       b.onclick = () => { sel = b.dataset.go; paint(); showStation(sel); };
+    });
+  }
+
+  /** 主要区間の所要時間。押すとその路線を強調する */
+  function drawTimes() {
+    const list = cur.times || [];
+    if (!list.length) { $('times').innerHTML = ''; return; }
+    $('times').innerHTML = list.map(([lid, a, b, min, memo]) => {
+      const l = cur.lines.find((x) => x.id === lid);
+      const label = a === b ? `${esc(cur.stations[a].name)} 1周` : `${esc(cur.stations[a].name)} → ${esc(cur.stations[b].name)}`;
+      return `<button class="timerow" data-line="${esc(lid)}">
+        <span class="tm-route">${label}</span>
+        <span class="tm-line" style="--c:${esc(l.color)}">${esc(l.name)}</span>
+        <span class="tm-min">約${min}分</span>
+        ${memo ? `<span class="tm-memo">${esc(memo)}</span>` : ''}
+      </button>`;
+    }).join('');
+    $('times').querySelectorAll('[data-line]').forEach((b2) => {
+      b2.onclick = () => { setMode('look'); selectLine(b2.dataset.line); $('stage').scrollIntoView({ block: 'center' }); };
     });
   }
 
@@ -264,6 +283,21 @@
         c: shuffle([ans, ...shuffle(off).slice(0, 3)]).map((s) => cur.stations[s].name),
         aName: cur.stations[ans].name,
         exp: `${l.name}は ${on.map((s) => cur.stations[s].name).join('→')} と進む。${l.note.replace(/\*\*/g, '')}` });
+    });
+    // 主要区間の所要時間
+    (cur.times || []).forEach((t, i) => {
+      const [lid, a2, b2, min, ] = t;
+      const l = cur.lines.find((x) => x.id === lid);
+      const label = a2 === b2 ? `${cur.stations[a2].name}から${l.name}で1周する` : `${cur.stations[a2].name}から${cur.stations[b2].name}まで${l.name}で行く`;
+      // 紛らわしい選択肢を作る。重複しないように間隔を変えて選ぶ
+      const cand = [min];
+      [Math.round(min * 2), min + 10, Math.max(1, Math.round(min / 2)), min + 5, min + 20, Math.max(1, min - 3)]
+        .forEach((v) => { if (cand.length < 4 && !cand.includes(v)) cand.push(v); });
+      qs.push({ k: 'time-' + i, type: 'mc',
+        q: `${label}と、およそ何分かかるか。`,
+        c: shuffle(cand).map((v) => v + '分'),
+        aName: min + '分',
+        exp: `およそ${min}分。乗車時間の目安で、乗り換えの歩きや待ち時間は含まない。${l.note.replace(/\*\*/g, '')}` });
     });
     // 環状運転をするのはどれか
     const loops = cur.lines.filter((l) => l.loop);
@@ -375,6 +409,7 @@
     document.querySelector('.bar-title .logo').textContent = c.emoji;
     $('city-lead').innerHTML = rich(c.lead);
     $('facts').innerHTML = rich(c.facts);
+    drawTimes();
     draw();
     drawLegend();
     setMode(mode);

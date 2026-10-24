@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2f6f4f">
 <meta name="description" content="東京・大阪・名古屋の路線図。骨格だけを描いて、乗換駅と路線のつながりを覚えるアプリ。">
 <title>路線図</title>
-<link rel="stylesheet" href="style.css?v=2">
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
@@ -31,13 +31,15 @@
   <div id="choices" class="choices"></div>
   <p class="hint" id="hint"></p>
 
+  <div class="card times"><h2>主要区間の所要時間</h2><div id="times"></div>
+    <p class="small-note">乗車時間の目安です。乗り換えの歩きや待ち時間は含みません。</p></div>
   <div class="card facts"><h2>この街の路線の見方</h2><p id="facts"></p></div>
   <p class="foot" id="foot"></p>
 </main>
 
 <div id="toast" role="status" aria-live="polite"></div>
 
-<script src="data-rail.js?v=2"></script>
-<script src="app.js?v=2"></script>
+<script src="data-rail.js?v=3"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>
