@@ -1,12 +1,12 @@
 // オフライン対応。図はすべて data-manner.js の中にあるので、ファイルは4つだけ。
 // ファイルを更新したら CACHE の番号と、index.html の ?v= の番号を一緒に上げる。
-const CACHE = 'manner-v2';
+const CACHE = 'manner-v3';
 const FILES = [
   './',
   'index.html',
-  'style.css?v=2',
-  'app.js?v=2',
-  'data-manner.js?v=2',
+  'style.css?v=3',
+  'app.js?v=3',
+  'data-manner.js?v=3',
 ];
 
 self.addEventListener('install', (e) => {
