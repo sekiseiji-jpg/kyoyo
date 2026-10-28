@@ -94,6 +94,7 @@ QUIZ.forEach((q) => {
 });
 
 // 単元ごとの分量が計画どおりか
+let warnMix = 0;
 const summary = [];
 for (const [id, u] of UNIT) {
   // 読書コーナーの単元は本棚アプリ（koten/ など）を開くだけで、カードもクイズも持たない
@@ -104,6 +105,14 @@ for (const [id, u] of UNIT) {
   const plan = PRI_PLAN[u.pri];
   if (ts.length !== plan.cards) err(id, `カードが ${ts.length} 枚（優先度${u.pri} の計画は ${plan.cards} 枚）`);
   if (qs.length !== plan.quiz) err(id, `クイズが ${qs.length} 問（優先度${u.pri} の計画は ${plan.quiz} 問）`);
+  // 形式の配分（再現プロンプト.md の目安）。作りやすい四択に寄りがちなので数えて警告する
+  const mix = { mc: 0, tf: 0, cloze: 0, order: 0 };
+  qs.forEach((q) => { if (mix[q.type] !== undefined) mix[q.type]++; });
+  const RANGE = { mc: [12, 16], tf: [7, 11], cloze: [5, 9], order: [0, 3] };
+  const off = Object.entries(RANGE)
+    .filter(([k, [lo, hi]]) => mix[k] < lo || mix[k] > hi)
+    .map(([k, [lo, hi]]) => `${k} ${mix[k]}（目安 ${lo}〜${hi}）`);
+  if (off.length) { console.error(`  ⚠ ${id}: 形式が偏っています → ${off.join(' / ')}`); warnMix++; }
   summary.push({ id, name: u.name, pri: u.pri, c: ts.length, q: qs.length, state: '公開' });
 }
 
@@ -188,4 +197,9 @@ ready.forEach((s) => { byPri[s.pri][0]++; byPri[s.pri][1] += s.c; byPri[s.pri][2
 Object.entries(byPri).forEach(([p, v]) => console.log(`  優先度${p}: ${v[0]}単元 カード${v[1]}枚 クイズ${v[2]}問`));
 const left = summary.filter((s) => s.state === '準備中');
 if (left.length) console.log(`\n準備中 ${left.length} 単元: ${left.map((s) => s.id).join(' ')}`);
+const mixAll = { mc: 0, tf: 0, cloze: 0, order: 0 };
+QUIZ.forEach((q) => { if (mixAll[q.type] !== undefined) mixAll[q.type]++; });
+console.log(`\n形式: 四択${mixAll.mc} ／ ○✕${mixAll.tf} ／ 穴埋め${mixAll.cloze} ／ 並べ替え${mixAll.order}`);
+if (warnMix) console.log(`  形式が目安から外れている単元: ${warnMix}`);
+
 console.log('\n検査: 問題なし');
