@@ -182,6 +182,8 @@ node tools/make-map.js <admin1.geojson> <world.geojson> <places.geojson>
 | `tools/build.js` | 結合・索引生成・検査 | × |
 | `tools/make-icons.ps1` | アイコン4種の生成（**ASCII のみで書くこと**） | × |
 | `tools/make-map.js` | 地図データの生成（Natural Earth の GeoJSON → SVG パス） | × |
+| `tools/list-quiz.js` | 1単元の全30問を一覧表示（`node tools/list-quiz.js 3-1`） | × |
+| `tools/replace-quiz.js` | 問題を id 指定で差し替える（`node tools/replace-quiz.js 3-1 定義.json`）。差し替え前の本文を引用せずに済む | × |
 | `構想.md`・`単元一覧.md`・`再現プロンプト.md` | 設計のドキュメント | × |
 
 読み込み順: `data-units.js` → `data-*.js`（5本）→ `index-term.js` → `app.js`。
