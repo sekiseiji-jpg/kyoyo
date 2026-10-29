@@ -1,16 +1,16 @@
 // オフライン対応：骨組みは先に保存し、本文は読んだ巻だけをあとから保存する。
 // 全巻をまとめて保存する操作は設定シートにあり、ページ側から同じキャッシュに入れる（app.js）。
 // ファイルを更新したときは CACHE の番号を上げる（index.html の ?v= と同じ番号にする）。
-const CACHE = 'eibeibungaku-v20';          // 骨組み（版を上げると入れ替わる）
-const TEXTS = 'eibeibungaku-text';     // 本文（版を上げても残す）
+const CACHE = 'kyoyo-eibeibungaku-v23';          // 骨組み（版を上げると入れ替わる）
+const TEXTS = 'kyoyo-eibeibungaku-text';     // 本文（版を上げても残す）
 const SHELL = [
   './',
   'index.html',
-  'style.css?v=20',
-  'data-works.js?v=20',
-  'data-notes.js?v=20',
-  'data-authors.js?v=20',
-  'app.js?v=20',
+  'style.css?v=23',
+  'data-works.js?v=23',
+  'data-notes.js?v=23',
+  'data-authors.js?v=23',
+  'app.js?v=23',
   'manifest.webmanifest',
   'icon-192.png',
   'icon-512.png',
@@ -40,7 +40,7 @@ self.addEventListener('activate', (e) => {
       .then((ks) => Promise.all(ks
         // 消すのは自分の古い版だけにする。キャッシュはドメイン全体で共有なので、
         // 名前で絞らないと同じドメインに置いた別のアプリまで消してしまう
-        .filter((k) => k.startsWith('eibeibungaku') && k !== CACHE && k !== TEXTS)
+        .filter((k) => k.startsWith('kyoyo-eibeibungaku') && k !== CACHE && k !== TEXTS)
         .map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );

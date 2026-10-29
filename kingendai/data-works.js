@@ -10,8 +10,8 @@ const APP = {
   icon: '📖',
   unit: '章',
   textVer: '1',                   // text/ の ?v=（本文を直したときだけ上げる）
-  cache: 'kingendai-v7',
-  textCache: 'kingendai-text',          // sw.js の CACHE と必ず同じにする
+  cache: 'kyoyo-kingendai-v10',
+  textCache: 'kyoyo-kingendai-text',          // sw.js の CACHE と必ず同じにする
   lead: '明治から昭和にかけての文学を、青空文庫の本文で通して読むための本棚です。必須の二十冊と、分野別の代表作十冊。章ごとに要約がついています。',
 };
 

@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
 
@@ -32,6 +32,7 @@
   <!-- 作品一覧 -->
   <section id="view-works" class="view">
     <p class="lead" id="works-lead"></p>
+    <div class="sio" id="sio-box" hidden></div>
     <div id="work-list" class="grid"></div>
     <div class="note">
       <b>このアプリについて</b>
@@ -89,6 +90,7 @@
       <span class="sw-note" id="sw-note"></span>
     </div>
     <div class="speak" id="maki-speak">
+      <button class="sw" id="sio-btn" type="button">🔖 栞をはさむ</button>
       <button class="sw" id="sp-play" type="button">▶ 読み上げ</button>
       <label class="sp-rate">速さ
         <select id="sp-rate">
@@ -137,8 +139,8 @@
   </div>
 </div>
 
-<script src="data-works.js?v=7"></script>
-<script src="data-authors.js?v=7"></script>
-<script src="app.js?v=7"></script>
+<script src="data-works.js?v=10"></script>
+<script src="data-authors.js?v=10"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>

@@ -25,7 +25,7 @@
   WORKS.forEach(function (w) { workById[w.id] = w; });
 
   /* ---------- 保存（設定と読んだ記録） ---------- */
-  var st = { size: 'm', theme: 'auto', lh: 'n', rate: '1', read: {}, last: null };
+  var st = { size: 'm', theme: 'auto', lh: 'n', rate: '1', read: {}, last: null, marks: [] };
   try {
     var raw = localStorage.getItem(KEY);
     if (raw) {
@@ -246,8 +246,72 @@
   }
 
   /* ---------- 画面1 作品一覧 ---------- */
+  // withTitle… 作品ごとにまとめた中では作品名を繰り返さないので、見出し側に任せる
+  function markRow(kind, b, withTitle) {
+    var w = workById[b.w];
+    if (!w) return null;
+    var m = w.maki.filter(function (x) { return String(x.no) === String(b.m); })[0];
+    if (!m) return null;
+    var row = el('div', 'siorow');
+    var go1 = el('button', 'siogo');
+    go1.appendChild(el('span', 'siok' + (kind === '栞' ? ' is' : ''), kind));
+    var t = el('span', 'siot');
+    var head = '第' + m.no + unitOf(w) + '　' + m.name;
+    t.appendChild(el('b', null, withTitle ? w.title + '　' + head : head));
+    t.appendChild(el('span', 'sios', b.s || m.lead || ''));
+    go1.appendChild(t);
+    go1.onclick = function () {
+      go('#w=' + w.id + '&m=' + m.no + '&t=' + (b.t || 'yaku') +
+        '&p=' + (b.p || 0) + '&r=' + (b.r || 0));
+    };
+    row.appendChild(go1);
+    if (kind === '栞') {
+      var x = el('button', 'siox', '×');
+      x.title = 'この栞をはずす';
+      x.onclick = function () {
+        var i = markAt(b.w, b.m);
+        if (i >= 0) { st.marks.splice(i, 1); save(); renderMarks(); }
+      };
+      row.appendChild(x);
+    }
+    return row;
+  }
+  function renderMarks() {
+    var box = $('sio-box');
+    if (!box) return;
+    box.textContent = '';
+    var frag = document.createDocumentFragment();
+    var n = 0;
+
+    // 読みかけは1件だけなので、作品名を付けていちばん上に置く
+    if (st.last) {
+      var r = markRow('続き', st.last, true);
+      if (r) { frag.appendChild(r); n++; }
+    }
+    // 栞は作品ごとにまとめる。並びは本棚の順、作品の中は巻の順
+    WORKS.forEach(function (w) {
+      var mine = st.marks.filter(function (b) { return b.w === w.id; })
+        .sort(function (a, b) { return Number(a.m) - Number(b.m); });
+      if (!mine.length) return;
+      var h = el('div', 'siow');
+      h.appendChild(el('span', 'siowi', w.icon || ''));
+      h.appendChild(el('span', 'siownm', w.title));
+      h.appendChild(el('span', 'siownn', mine.length + '件'));
+      frag.appendChild(h);
+      mine.forEach(function (b) {
+        var r2 = markRow('栞', b, false);
+        if (r2) { frag.appendChild(r2); n++; }
+      });
+    });
+
+    box.hidden = !n;
+    if (!n) return;
+    box.appendChild(el('b', null, '読みかけと栞'));
+    box.appendChild(frag);
+  }
   function renderWorks() {
     $('works-lead').textContent = APP.lead;
+    renderMarks();
     var box = $('work-list');
     box.textContent = '';
     WORKS.forEach(function (w) {
@@ -389,7 +453,106 @@
     }
     return '';
   }
-  function renderMaki(w, m, type) {
+  /* ---------- 栞 ---------- */
+  // 本文の段落に通し番号を振り、画面のいちばん上に見えている位置を「いまの位置」とする。
+  // 読みかけ（st.last）は自動で、栞（st.marks）は読者が自分ではさむ。
+  function paras() {
+    var b = $('maki-body');
+    return b ? b.querySelectorAll('[data-p]') : [];
+  }
+  // 位置は段落の番号 p だけでなく、その段落のどこまで来たか r（0〜1）も持つ。
+  // 古典の一段落は画面何枚分にもなるので、段落の頭だけだと文章の途中に戻れない。
+  // 高さをピクセルで覚えると文字の大きさを変えたときに狂うため、割合で持つ。
+  var TOP = 96;                     // ヘッダーのぶん下げて測る
+  function nowPos() {
+    var ps = paras();
+    for (var i = 0; i < ps.length; i++) {
+      var b = ps[i].getBoundingClientRect();
+      if (b.bottom > TOP) {
+        var into = b.height ? (TOP - b.top) / b.height : 0;
+        return { p: i, r: Math.round(Math.min(1, Math.max(0, into)) * 1000) / 1000 };
+      }
+    }
+    return { p: ps.length ? ps.length - 1 : 0, r: 0 };
+  }
+  // 栞の一覧に出す片こと。段落の頭ではなく、実際に止めたあたりから抜く
+  function paraText(i, ratio) {
+    var ps = paras();
+    if (!ps[i]) return '';
+    var t = ps[i].textContent.replace(/\s+/g, ' ').trim();
+    var at = Math.floor(t.length * (ratio || 0));
+    if (at > t.length - 10) at = Math.max(0, t.length - 30);     // 末尾だと空になるので戻す
+    // 英文は語の途中から始まると読みにくいので、近くに空白があればそこまで送る
+    if (at > 0 && /\S/.test(t.charAt(at - 1))) {
+      var sp = t.indexOf(' ', at);
+      if (sp >= 0 && sp - at < 12) at = sp + 1;
+    }
+    return t.slice(at, at + 30);
+  }
+  function scrollToPos(i, ratio) {
+    var ps = paras();
+    if (!ps[i]) return;
+    var b = ps[i].getBoundingClientRect();
+    window.scrollTo(0, Math.max(0, b.top + window.pageYOffset + b.height * (ratio || 0) - TOP));
+  }
+  function markAt(wid, no) {
+    for (var i = 0; i < st.marks.length; i++) {
+      if (st.marks[i].w === wid && String(st.marks[i].m) === String(no)) return i;
+    }
+    return -1;
+  }
+  // 短い知らせ。栞をはさんだときなどに、1.4秒だけ出して消える。
+  // 置き場所は作らず、必要になったときに body へ足す（HTML を分野ごとに直さずに済む）
+  var tipWait = null;
+  function tip(msg) {
+    var e = $('tip');
+    if (!e) {
+      e = el('div', 'tip');
+      e.id = 'tip';
+      e.setAttribute('role', 'status');      // 読み上げにも伝わるようにする
+      document.body.appendChild(e);
+    }
+    e.textContent = msg;
+    e.classList.add('on');
+    clearTimeout(tipWait);
+    tipWait = setTimeout(function () { e.classList.remove('on'); }, 1400);
+  }
+  function paintMarkBtn() {
+    var b = $('sio-btn');
+    if (!b) return;
+    var on = curWork && curMaki && markAt(curWork.id, curMaki.no) >= 0;
+    b.classList.toggle('on', !!on);
+    b.textContent = on ? '🔖 栞をはずす' : '🔖 栞をはさむ';
+  }
+  function toggleMark() {
+    if (!curWork || !curMaki) return;
+    var i = markAt(curWork.id, curMaki.no);
+    tip(i >= 0 ? '栞をはずしました' : '栞をはさみました');
+    if (i >= 0) st.marks.splice(i, 1);
+    else {
+      var at = nowPos();
+      st.marks.unshift({ w: curWork.id, m: curMaki.no, t: curType, p: at.p, r: at.r, s: paraText(at.p, at.r) });
+      st.marks = st.marks.slice(0, 50);        // 多すぎると一覧が読めないので50まで
+    }
+    save();
+    paintMarkBtn();
+  }
+  // 読んでいるあいだ、いまの位置を控えておく（読みかけ）
+  var posWait = null;
+  window.addEventListener('scroll', function () {
+    var v = $('view-maki');
+    if (posWait || !curWork || !curMaki || !v || v.classList.contains('hidden')) return;
+    posWait = setTimeout(function () {
+      posWait = null;
+      var v2 = $('view-maki');
+      if (!curWork || !curMaki || !v2 || v2.classList.contains('hidden')) return;
+      var at = nowPos();
+      st.last = { w: curWork.id, m: curMaki.no, t: curType, p: at.p, r: at.r };
+      save();
+    }, 700);
+  });
+
+  function renderMaki(w, m, type, jumpP, jumpR) {
     spStop();
     curWork = w; curMaki = m; curType = type;
     var h = $('maki-head');
@@ -443,8 +606,10 @@
       if (curMaki !== m || curType !== type) return;    // 読み込み中に別の巻へ移ったとき
       paint(body, d, type);
       st.read[w.id + '/' + m.no] = 1;
-      st.last = { w: w.id, m: m.no, t: type };
+      st.last = { w: w.id, m: m.no, t: type, p: jumpP || 0, r: jumpR || 0 };
       save();
+      paintMarkBtn();
+      if (jumpP || jumpR) scrollToPos(jumpP, jumpR);
     }, function () {
       body.textContent = '';
       body.appendChild(el('div', 'err', '本文を読み込めませんでした。通信を確かめて、もう一度お試しください。'));
@@ -493,6 +658,8 @@
       d.y.forEach(function (p) { frag.appendChild(el('p', null, p)); });
     }
     body.appendChild(frag);
+    // 栞と読みかけのために、段落に通し番号を振っておく
+    for (var i = 0; i < body.children.length; i++) body.children[i].setAttribute('data-p', i);
   }
 
   /* ---------- 読み上げ ----------
@@ -855,10 +1022,13 @@
         // URL で指定がなければ、その分野の既定（APP.firstType）に従う
         var want = (q.t === 'genbun' || q.t === 'taisho' || q.t === 'yaku') ? q.t : firstType(m);
         if (!has(m, want)) want = firstType(m);
-        renderMaki(w, m, want);
+        // 画面を出して先頭へ戻すのは renderMaki より前。本文がすでに読み込み済みだと
+        // renderMaki の中のスクロール（栞の段落へ飛ぶ処理）がその場で起きるので、
+        // あとから先頭へ戻すと打ち消してしまう
         show('maki');
         $('bar-title').textContent = w.title + '　' + m.name;
         window.scrollTo(0, 0);
+        renderMaki(w, m, want, Number(q.p) || 0, Number(q.r) || 0);
         return;
       }
     }
@@ -880,6 +1050,12 @@
     $('bar-title').textContent = APP.title;
   }
   window.addEventListener('hashchange', route);
+
+  // 画面の位置はこのアプリが自分で決める（巻を開いたら先頭、栞からなら栞の位置）。
+  // ブラウザまかせにすると、読み込みのあとで前回の位置に戻されて、栞の位置が打ち消される
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+  if ($('sio-btn')) $('sio-btn').onclick = toggleMark;
 
   $('btn-back').onclick = function () {
     var q = parse();
@@ -913,7 +1089,7 @@
   $('set-lh').onchange = function () { st.lh = this.value; applySettings(); save(); };
   $('btn-clear').onclick = function () {
     if (!confirm('読んだ' + U0 + 'の記録を消します。よろしいですか。')) return;
-    st.read = {}; st.last = null; save(); route();
+    st.read = {}; st.last = null; st.marks = []; save(); route();
     $('read-hint').textContent = '読んだ' + U0 + 'は 0';
   };
 

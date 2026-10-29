@@ -1,14 +1,14 @@
 // オフライン対応：骨組みは先に保存し、本文は読んだ巻だけをあとから保存する。
 // 全巻をまとめて保存する操作は設定シートにあり、ページ側から同じキャッシュに入れる（app.js）。
 // ファイルを更新したときは CACHE の番号を上げる（index.html の ?v= と同じ番号にする）。
-const CACHE = 'kotenbungaku-v30';          // 骨組み（版を上げると入れ替わる）
-const TEXTS = 'kotenbungaku-text';     // 本文（版を上げても残す）
+const CACHE = 'kyoyo-kotenbungaku-v33';          // 骨組み（版を上げると入れ替わる）
+const TEXTS = 'kyoyo-kotenbungaku-text';     // 本文（版を上げても残す）
 const SHELL = [
   './',
   'index.html',
-  'style.css?v=30',
-  'data-works.js?v=30',
-  'app.js?v=30',
+  'style.css?v=33',
+  'data-works.js?v=33',
+  'app.js?v=33',
   'manifest.webmanifest',
   'icon-192.png',
   'icon-512.png',
@@ -28,7 +28,7 @@ self.addEventListener('activate', (e) => {
       .then((ks) => Promise.all(ks
         // 消すのは自分の古い版だけにする。キャッシュはドメイン全体で共有なので、
         // 名前で絞らないと同じドメインに置いた別のアプリまで消してしまう
-        .filter((k) => k.startsWith('kotenbungaku') && k !== CACHE && k !== TEXTS)
+        .filter((k) => k.startsWith('kyoyo-kotenbungaku') && k !== CACHE && k !== TEXTS)
         .map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );

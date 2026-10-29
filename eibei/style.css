@@ -310,3 +310,40 @@ body{
   border-radius:8px; padding:4px 8px; font:inherit; font-size:.82rem;
 }
 .body .sp-now{background:var(--mark); border-radius:6px}
+
+/* 栞と読みかけ。作品一覧の上に出て、押すとその段落へ戻る。
+   巻一覧の行が .mk を使っているので、こちらは sio（栞）で始める名前にしてある */
+.sio{background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:12px 14px; margin:0 0 16px}
+.sio>b{display:block; font-size:.9em; color:var(--c); letter-spacing:.04em; margin-bottom:8px}
+.siorow{display:flex; align-items:stretch; gap:6px; margin-top:6px}
+.siogo{flex:1; display:flex; align-items:center; gap:10px; text-align:left;
+  background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+  padding:9px 11px; font:inherit; color:inherit; cursor:pointer; min-width:0}
+.siogo:hover{border-color:var(--c)}
+.siok{flex:none; font-size:.78em; padding:3px 8px; border-radius:999px;
+  background:var(--soft); color:var(--c); white-space:nowrap}
+.siok.is{background:var(--c); color:var(--header-fg)}
+.siot{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px}
+.siot b{font-size:.95em; font-weight:600}
+.sios{font-size:.85em; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.siox{flex:none; width:36px; border:1px solid var(--border); border-radius:10px;
+  background:var(--surface2); color:var(--muted); font:inherit; cursor:pointer}
+.siox:hover{border-color:var(--c); color:var(--c)}
+#sio-btn.on{background:var(--c); color:var(--header-fg); border-color:var(--c)}
+
+/* 短い知らせ。栞をはさんだときに下から出て、すぐ消える */
+.tip{position:fixed; left:50%; bottom:28px; transform:translate(-50%, 12px);
+  background:var(--c); color:var(--header-fg); padding:10px 20px; border-radius:999px;
+  font-size:.95em; box-shadow:0 6px 20px rgba(0,0,0,.25); white-space:nowrap;
+  opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease; z-index:50}
+.tip.on{opacity:1; transform:translate(-50%, 0)}
+@media (prefers-reduced-motion: reduce){ .tip{transition:none} }
+
+/* 栞の一覧の、作品ごとの見出し */
+.siow{display:flex; align-items:baseline; gap:8px; margin:14px 0 2px;
+  padding-top:10px; border-top:1px solid var(--border)}
+.siow:first-of-type{margin-top:10px}
+.siowi{flex:none; font-size:1.05em}
+.siownm{font-weight:600; font-size:.95em}
+.siownn{margin-left:auto; font-size:.8em; color:var(--muted)}

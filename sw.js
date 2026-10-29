@@ -1,7 +1,7 @@
 // オフライン対応: アプリのファイルはネット優先で取得し、つながらないときはキャッシュを使う
 // 公開ファイルを更新したら CACHE の番号と、index.html の ?v= の番号を一緒に上げる
 // （?v= で index.html と同じ版の CSS/JS を読むので、更新の途中で新旧が混ざらない）
-const CACHE = 'kyoyo-v25';
+const CACHE = 'kyoyo-v26';
 const FILES = [
   './',
   'index.html',
@@ -36,7 +36,9 @@ self.addEventListener('activate', (e) => {
       // 消すのは自分の古い版だけにする。キャッシュはドメイン全体で共有なので、
       // 名前で絞らないと同じドメインに置いた別のアプリ（読書コーナーの本棚など）まで消してしまう
       .then((keys) => Promise.all(keys
-        .filter((k) => k.startsWith('kyoyo-') && k !== CACHE)
+        // 自分の版（kyoyo-v<番号>）だけを消す。前方一致だけで絞ると、
+        // 読み物側の kyoyo-kotenbungaku-… まで巻き添えになる
+        .filter((k) => /^kyoyo-v\d+$/.test(k) && k !== CACHE)
         .map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );

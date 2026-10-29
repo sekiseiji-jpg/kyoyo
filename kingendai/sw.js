@@ -1,15 +1,15 @@
 // オフライン対応：骨組みは先に保存し、本文は読んだ章だけをあとから保存する。
 // 全章をまとめて保存する操作は設定シートにあり、ページ側から同じキャッシュに入れる（app.js）。
 // ファイルを更新したときは CACHE の番号を上げる（index.html の ?v= と同じ番号にする）。
-const CACHE = 'kingendai-v7';          // 骨組み（版を上げると入れ替わる）
-const TEXTS = 'kingendai-text';     // 本文（版を上げても残す）
+const CACHE = 'kyoyo-kingendai-v10';          // 骨組み（版を上げると入れ替わる）
+const TEXTS = 'kyoyo-kingendai-text';     // 本文（版を上げても残す）
 const SHELL = [
   './',
   'index.html',
-  'style.css?v=7',
-  'data-works.js?v=7',
-  'data-authors.js?v=7',
-  'app.js?v=7',
+  'style.css?v=10',
+  'data-works.js?v=10',
+  'data-authors.js?v=10',
+  'app.js?v=10',
   'manifest.webmanifest',
   'icon-192.png',
   'icon-512.png',
@@ -56,7 +56,7 @@ self.addEventListener('activate', (e) => {
       .then((ks) => Promise.all(ks
         // 消すのは自分の古い版だけにする。キャッシュはドメイン全体で共有なので、
         // 名前で絞らないと同じドメインに置いた別のアプリまで消してしまう
-        .filter((k) => k.startsWith('kingendai') && k !== CACHE && k !== TEXTS)
+        .filter((k) => k.startsWith('kyoyo-kingendai') && k !== CACHE && k !== TEXTS)
         .map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );

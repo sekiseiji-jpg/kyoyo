@@ -11,8 +11,8 @@ const APP = {
   icon: '📗',
   unit: '章',
   textVer: '12',                        // text/ の ?v=（本文を直したときだけ上げる）
-  cache: 'eibeibungaku-v20',
-  textCache: 'eibeibungaku-text',      // sw.js の TEXTS と必ず同じにする
+  cache: 'kyoyo-eibeibungaku-v23',
+  textCache: 'kyoyo-eibeibungaku-text',      // sw.js の TEXTS と必ず同じにする
   taishoNote: '原文と日本語訳を一段ずつ並べています。',
   firstType: 'genbun',               // 章を開いたら、まず英語の原文を出す
   genbunLang: 'en-US',               // 原文は英語の音声で読み上げる
