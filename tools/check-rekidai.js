@@ -4,10 +4,12 @@ const fs = require('fs');
 const path = require('path');
 const dir = process.argv[2] || 'rekidai';
 global.window = {};
-['data-tenno.js', 'data-buke.js', 'data-souri.js'].forEach((f) => {
+['data-tenno.js', 'data-buke.js', 'data-souri.js', 'data-meika-jp.js', 'data-meika-world.js'].forEach((f) => {
   eval(fs.readFileSync(path.join(dir, f), 'utf8'));
 });
 const T = window.REK_TENNO, B = window.REK_BUKE, S = window.REK_SOURI;
+const MJ = window.REK_MEIKA_JP, MW = window.REK_MEIKA_WORLD;
+const HOUSES = [MJ, MW];
 const pid = (it) => it.same || it.name;
 // A級戦犯・JR・PKO のような大文字だけの短い略語は日本語として普通なので見逃す
 const foreign = (t) => /[\u0400-\u04FF]/.test(t) || /[A-Za-z]{4,}/.test(t) || /[a-z]{2,}/.test(t);
@@ -21,37 +23,58 @@ const yv = (v) => {
   return Number(m[1]) + (Number(m[2]) - 1) / 12;
 };
 
-for (const L of [T, B, S]) {
+for (const L of [T, B, S, MJ, MW]) {
   const eraIds = L.eras.map((e) => e.id);
   const names = [];
   L.items.forEach((it, i) => {
-    const who = `${L.id} 第${it.n}代 ${it.name}`;
+    const who = L.kind === 'house' ? `${L.id} ${it.name}` : `${L.id} 第${it.n}代 ${it.name}`;
     if (!it.name || !it.yomi) bad.push(`${who}: 名前かよみが無い`);
     if (!/^[ぁ-ゖー]+$/.test(it.yomi)) bad.push(`${who}: よみがひらがなでない → ${it.yomi}`);
     if (!eraIds.includes(it.era)) bad.push(`${who}: 知らない時代 ${it.era}`);
-    if (yv(it.to) < yv(it.from)) bad.push(`${who}: 終わりが始まりより前`);
+    if (!L.kind && yv(it.to) < yv(it.from)) bad.push(`${who}: 終わりが始まりより前`);
+    if (L.kind === 'house') {
+      if (!it.rank) bad.push(`${who}: ${(L.cols || {}).rank || '区分'} が無い`);
+      if (it.n != null) bad.push(`${who}: 家の一覧に代（n）がある`);
+    }
     if (!names.includes(pid(it))) names.push(pid(it));
     if (it.same && !L.items.some((x) => x.name === it.same)) bad.push(`${who}: same の相手がいない`);
     ['name', 'note', 'yomi', 'party', 'seq'].forEach((k) => {
       if (it[k] && /[A-Za-zЀ-ӿÀ-ɏ]/.test(it[k])) warn.push(`${who}: ${k} に外国の文字 → ${it[k]}`);
     });
-    if (it.n == null) bad.push(`${who}: 代が無い`);
+    if (it.n == null && !L.kind) bad.push(`${who}: 代が無い`);
     if (it.m) bad.push(`${who}: 使っていない項目 m がある`);
+  });
+  // 同じ一覧に同じ名前が二度出ていないか（家の一覧は一家一行）
+  if (L.kind === 'house') {
+    const seen = new Set();
+    L.items.forEach((it) => {
+      if (seen.has(it.name)) bad.push(`${L.id}: ${it.name} が二度出てくる`);
+      seen.add(it.name);
+    });
+  }
+  // 時代の見出しに書いた数と、実際の件数が合っているか（「9代 ／ …」「10か国」のように数で始まるもの）
+  L.eras.forEach((e) => {
+    const m = /^(\d+)(か国|家|代)/.exec(e.sub || '');
+    if (!m) return;
+    const n = L.items.filter((i) => i.era === e.id).length;
+    if (Number(m[1]) !== n) bad.push(`${L.id}/${e.id}: 見出しは「${m[0]}」だが ${n} 件`);
   });
   // 代の並び（時代ごとに 1 から振り直すものもある）
   const byEra = {};
   L.items.forEach((it) => { (byEra[it.era] = byEra[it.era] || []).push(it.n); });
   Object.entries(byEra).forEach(([e, ns]) => {
+    if (L.kind) return;
     const sorted = ns.slice().sort((a, b) => a - b);
     if (String(ns) !== String(sorted)) bad.push(`${L.id}/${e}: 代の順が前後している`);
   });
   // 時代の並びがデータの並びと一致しているか
   const order = [...new Set(L.items.map((i) => i.era))];
   if (String(order) !== String(eraIds)) bad.push(`${L.id}: 時代の並びが eras と違う → ${order}`);
-  console.log(`[${L.id}] ${L.items.length}代 ／ ${names.length}人`);
+  console.log(`[${L.id}] ${L.items.length}${L.kind === 'house' ? '家' : '代 ／ ' + names.length + '人'}`);
   Object.entries(byEra).forEach(([e, ns]) => {
     const er = L.eras.find((x) => x.id === e);
-    console.log(`    ${er.name}: ${ns.length}件（第${ns[0]}〜${ns[ns.length - 1]}代） ${er.sub}`);
+    const range = L.kind === 'house' ? '' : `（第${ns[0]}〜${ns[ns.length - 1]}代）`;
+    console.log(`    ${er.name}: ${ns.length}件${range} ${er.sub}`);
   });
 }
 
@@ -134,6 +157,29 @@ console.log('    通算が短い: ' + tot.slice(-3).map((t) => `${t.nm} ${Math.r
   console.log(`\n${nm} 一代で長い: ${s.slice(0, 3).map(f).join(' / ')}`);
   console.log(`${nm} 一代で短い: ${s.slice(-3).map(f).join(' / ')}`);
 });
+
+// ---- 名家 ----
+const nowKing = MW.items.filter((i) => i.era !== 'past');
+const pastKing = MW.items.filter((i) => i.era === 'past');
+console.log(`\n名家: 日本${MJ.items.length}家 ／ 世界${MW.items.length}家（合わせて ${MJ.items.length + MW.items.length}家）`);
+console.log(`    いまも王をいただく国: ${nowKing.length} ／ 歴史に名を残す家: ${pastKing.length}`);
+if (!MW.lead.includes(`${nowKing.length}の国`)) bad.push(`世界の名家: 紹介文の国の数が ${nowKing.length} と合わない`);
+if (!MW.lead.includes(`${pastKing.length}の家`)) bad.push(`世界の名家: 紹介文の家の数が ${pastKing.length} と合わない`);
+if (new Set(nowKing.map((i) => i.rank)).size !== nowKing.length) bad.push('世界の名家: 同じ国が二度出てくる');
+if (!MW.asof) bad.push('世界の名家: いつ確かめたか（asof）が無い');
+HOUSES.forEach((L) => {
+  if (!/主な|全部ではない|選んだ/.test(L.lead + L.note)) {
+    bad.push(`${L.id}: 全部ではないと断っていない（選んだ一覧なので必ず書く）`);
+  }
+});
+// 爵位は五爵と「皇族」「―」だけ
+const RANKS = ['公爵', '侯爵', '伯爵', '子爵', '男爵', '皇族', '―'];
+MJ.items.forEach((i) => {
+  if (!RANKS.includes(i.rank)) bad.push(`日本の名家 ${i.name}: 知らない爵位 ${i.rank}`);
+});
+const byRank = {};
+MJ.items.forEach((i) => { byRank[i.rank] = (byRank[i.rank] || 0) + 1; });
+console.log('    爵位の内わけ: ' + Object.entries(byRank).map(([k, v]) => `${k}${v}`).join(' / '));
 
 console.log('\n==== 直すべきこと ====');
 console.log(bad.length ? bad.join('\n') : 'なし');

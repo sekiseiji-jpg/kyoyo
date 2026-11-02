@@ -64,9 +64,10 @@ body {
 .wrap { max-width: 920px; margin: 0 auto; padding: 12px 12px 32px; }
 
 /* ---------- 切り替え ---------- */
-.switch { display: flex; gap: 6px; margin-bottom: 10px; }
+/* 一覧が5つになったので折り返す。1行に3つは入るようにしておく */
+.switch { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
 .sw {
-  flex: 1; padding: 8px 4px; border: 1px solid var(--line); border-radius: 10px;
+  flex: 1 1 30%; padding: 8px 4px; border: 1px solid var(--line); border-radius: 10px;
   background: var(--surface); color: var(--muted);
   font-size: 13px; font-family: inherit; cursor: pointer; white-space: nowrap;
 }

@@ -1,9 +1,13 @@
 'use strict';
 
 /* =========================================================
-   歴代人物一覧 ― 一般教養Note の「歴代人物」分野から開く別アプリ。
+   歴代と名家 ― 一般教養Note の「歴代と名家」分野から開く別アプリ。
      #tenno 歴代天皇 ／ #buke 将軍と執権 ／ #souri 歴代総理大臣
+     #meika-jp 日本の名家 ／ #meika-world 世界の名家
      #tenno&n=50 のように書くと、その代を開いた状態で始まる。
+
+   一覧は2種類ある。代が順に続くもの（kind なし）と、家を並べるもの（kind: 'house'）。
+   家のほうは代も在位も持たないので、行の作りとまとめの数字を分けてある。
 
    データは代ごとに in / out の年だけを持ち、
    「何年から何年まで」「何年続いたか」「人数」「最長・最短」は
@@ -11,7 +15,9 @@
    ========================================================= */
 (function () {
   const $ = (id) => document.getElementById(id);
-  const LISTS = [window.REK_TENNO, window.REK_BUKE, window.REK_SOURI];
+  const LISTS = [window.REK_TENNO, window.REK_BUKE, window.REK_SOURI,
+    window.REK_MEIKA_JP, window.REK_MEIKA_WORLD];
+  const isHouse = () => cur.kind === 'house';
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const rich = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -104,6 +110,7 @@
       if (tagPick && !(it.tags || []).includes(tagPick)) return false;
       if (!key) return true;
       const hay = [it.name, it.yomi, it.note || '', it.party || '', it.seq || '',
+        it.rank || '', it.sub || '', it.years || '',
         dispName(cur, it), String(it.n)].join(' ').toLowerCase();
       return hay.includes(key);
     });
@@ -137,13 +144,13 @@
           + `${list.length === total ? '' : ` ／ ${n}件`}</em></p>`;
       }
       const i = cur.items.indexOf(it);
-      const w = Math.max((len(it) / maxLen) * 100, 1.5);
       const badges = (it.tags || []).map((t) => `<span class="badge">${esc(t)}</span>`).join('');
       html += `<button class="prow${i === sel ? ' on' : ''}" data-i="${i}">`
-        + `<span class="pn">第${it.n}代</span>`
+        + `<span class="pn">${isHouse() ? esc(it.rank || '') : `第${it.n}代`}</span>`
         + `<span class="pname">${esc(dispName(cur, it))}${esc(seqText(it))}<em>${esc(it.yomi)}</em>${badges}</span>`
-        + `<span class="pyear">${esc(spanText(it))}</span>`
-        + `<span class="pbar"><i style="width:${w.toFixed(1)}%"></i></span>`
+        + `<span class="pyear">${isHouse() ? esc(it.sub || '') : esc(spanText(it))}</span>`
+        + (isHouse() ? ''
+          : `<span class="pbar"><i style="width:${Math.max((len(it) / maxLen) * 100, 1.5).toFixed(1)}%"></i></span>`)
         + '</button>';
       if (i === sel) html += detailHtml(it, list);
     });
@@ -169,10 +176,18 @@
     const next = list[at + 1];
     const era = cur.eras.find((e) => e.id === it.era);
     const rows = [];
-    rows.push(['在位・在職', esc(spanText(it)) + (it.to === null ? '<span class="badge">いまも</span>' : '')]);
-    rows.push(['長さ', esc(fmtLen(it)) + (it.reignNote ? `<em class="yomi"> ／ ${esc(it.reignNote)}</em>` : '')]);
-    if (era) rows.push([era.role ? '職' : '時代', esc(era.role || era.name)]);
-    if (it.party) rows.push(['よりどころ', esc(it.party)]);
+    if (isHouse()) {
+      const cols = cur.cols || {};
+      if (it.rank) rows.push([cols.rank || '区分', esc(it.rank)]);
+      if (era) rows.push(['分け方', esc(era.name)]);
+      if (it.sub) rows.push([cols.sub || '人', esc(it.sub)]);
+      if (it.years) rows.push(['続いた年', esc(it.years)]);
+    } else {
+      rows.push(['在位・在職', esc(spanText(it)) + (it.to === null ? '<span class="badge">いまも</span>' : '')]);
+      rows.push(['長さ', esc(fmtLen(it)) + (it.reignNote ? `<em class="yomi"> ／ ${esc(it.reignNote)}</em>` : '')]);
+      if (era) rows.push([era.role ? '職' : '時代', esc(era.role || era.name)]);
+      if (it.party) rows.push(['よりどころ', esc(it.party)]);
+    }
     if (it.same) {
       const src = cur.items.find((x) => x.name === it.same);
       rows.push(['同じ人', src ? `第${src.n}代 ${esc(dispName(cur, src))}` : esc(it.same)]);
@@ -181,7 +196,7 @@
 
     return '<div class="detail">'
       + `<h3>${esc(dispName(cur, it))}${esc(seqText(it))}</h3>`
-      + `<p class="yomi">${esc(it.yomi)} ／ 第${it.n}代</p>`
+      + `<p class="yomi">${esc(it.yomi)}${isHouse() ? '' : ` ／ 第${it.n}代`}</p>`
       + `<dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl>`
       + (it.note ? `<p class="note">${rich(it.note)}</p>` : '')
       + '<div class="nav">'
@@ -204,6 +219,7 @@
   // この一覧の数字（すべてデータから数える）
   // =========================================================
   function drawSums() {
+    if (isHouse()) return drawSumsHouse();
     const items = cur.items;
     const people = peopleOf(items);
 
@@ -262,6 +278,24 @@
       + (skip.length ? `<p class="skipnote">※ いちばん長い・短いは、${esc(cur.statsSkipNote || '伝承の時代')}を除いて数えた。</p>` : '');
   }
 
+  /** 家の一覧のまとめ。代も在位も無いので、数と内わけだけを出す。 */
+  function drawSumsHouse() {
+    const items = cur.items;
+    const rows = [['家の数', `${items.length}家`]];
+    cur.eras.forEach((e) => {
+      const n = items.filter((i) => i.era === e.id).length;
+      // 見出しの頭に書いた数は、ここでは数え直すので省く
+      const sub = (e.sub || '').replace(/^\d+(か国|家|代)\s*(／\s*)?/, '');
+      if (n) rows.push([e.name, `${n}家${sub ? `　${sub}` : ''}`]);
+    });
+    allTags(cur).forEach((t) => {
+      const a = items.filter((i) => (i.tags || []).includes(t));
+      rows.push([t, a.map((i) => esc(i.name)).join('・')]);
+    });
+    $('sums').innerHTML = rows.map(([k, v]) => `<div><b>${esc(k)}</b><span>${v}</span></div>`).join('')
+      + (cur.asof ? `<p class="skipnote">※ いまの君主と即位の年は、${esc(cur.asof)}に確かめたもの。</p>` : '');
+  }
+
   // =========================================================
   // 切り替え
   // =========================================================
@@ -280,6 +314,7 @@
       + l.eras.map((e) => `<button class="chip" data-era="${esc(e.id)}">${esc(e.name)}</button>`).join('');
     $('tag-chips').innerHTML = allTags(l)
       .map((t) => `<button class="chip" data-tag="${esc(t)}">${esc(t)}だけ</button>`).join('');
+    $('q').placeholder = l.kind === 'house' ? '家名・よみ・ことがらで探す' : '名前・よみ・ことがらで探す';
     bindChips();
 
     $('cards').innerHTML = l.cards && l.cards.length
@@ -340,7 +375,7 @@
   window.addEventListener('hashchange', () => fromHash(true));
 
   $('foot').textContent = '代の数え方は宮内庁の歴代表・各幕府の歴代一覧・内閣制度の歴代内閣にならった。'
-    + '年と人数はこの一覧のデータから数えている。';
+    + '年と人数はこの一覧のデータから数えている。名家の一覧は主なものを選んだもので、全部ではない。';
   fromHash(true);
 
   if ('serviceWorker' in navigator && window.isSecureContext) {
