@@ -181,6 +181,32 @@ const byRank = {};
 MJ.items.forEach((i) => { byRank[i.rank] = (byRank[i.rank] || 0) + 1; });
 console.log('    爵位の内わけ: ' + Object.entries(byRank).map(([k, v]) => `${k}${v}`).join(' / '));
 
+// ---- 解説カードから一覧へのリンクが、実在する一覧と時代を指しているか ----
+const unitsPath = path.join(dir, '..', 'data-units.js');
+if (fs.existsSync(unitsPath)) {
+  eval(fs.readFileSync(unitsPath, 'utf8'));
+  const byId = {};
+  [T, B, S, MJ, MW].forEach((L) => { byId[L.id] = L; });
+  let n = 0;
+  Object.entries(window.CARD_LINKS || {}).forEach(([card, links]) => {
+    links.filter((x) => x[2] === 'list').forEach(([href, label]) => {
+      n += 1;
+      const m = /^rekidai\/#([a-z-]+)(?:&(.*))?$/.exec(href);
+      if (!m) { bad.push(`${card}: 一覧へのリンクの形が違う → ${href}`); return; }
+      const L = byId[m[1]];
+      if (!L) { bad.push(`${card}: そんな一覧は無い → ${m[1]}`); return; }
+      (m[2] || '').split('&').filter(Boolean).forEach((kv) => {
+        const [k, v] = kv.split('=');
+        if (k === 'e' && !L.eras.some((x) => x.id === v)) bad.push(`${card}: ${L.id} にそんな時代は無い → ${v}`);
+        if (k === 'n' && !L.items.some((x) => String(x.n) === v)) bad.push(`${card}: ${L.id} にそんな代は無い → ${v}`);
+        if (!['e', 'n', 'q'].includes(k)) bad.push(`${card}: 知らない指定 → ${k}`);
+      });
+      if (!label || label.length > 14) warn.push(`${card}: リンクの名が長い（${label}）`);
+    });
+  });
+  console.log(`\nカードから一覧へのリンク: ${n}本（行き先をすべて確かめた）`);
+}
+
 console.log('\n==== 直すべきこと ====');
 console.log(bad.length ? bad.join('\n') : 'なし');
 console.log('\n==== 目で見て確かめること ====');

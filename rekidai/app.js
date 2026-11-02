@@ -4,7 +4,10 @@
    歴代と名家 ― 一般教養Note の「歴代と名家」分野から開く別アプリ。
      #tenno 歴代天皇 ／ #buke 将軍と執権 ／ #souri 歴代総理大臣
      #meika-jp 日本の名家 ／ #meika-world 世界の名家
-     #tenno&n=50 のように書くと、その代を開いた状態で始まる。
+     あとに & でつなぐと、開いた形を指定できる。解説カードから飛んでくるときに使う。
+       n=50      … その代を開く（#tenno&n=50）
+       e=heian   … その時代だけに絞る（#tenno&e=heian）
+       q=院政     … その言葉で探した形にする（#tenno&q=院政）
 
    一覧は2種類ある。代が順に続くもの（kind なし）と、家を並べるもの（kind: 'house'）。
    家のほうは代も在位も持たないので、行の作りとまとめの数字を分けてある。
@@ -299,7 +302,8 @@
   // =========================================================
   // 切り替え
   // =========================================================
-  function setList(id, keepHash, openN) {
+  function setList(id, keepHash, opt) {
+    const o = opt || {};
     const l = LISTS.find((x) => x.id === id) || LISTS[0];
     cur = l; q = ''; eraPick = ''; tagPick = ''; sel = null;
     $('q').value = '';
@@ -323,8 +327,14 @@
         + `<div class="links">${l.cards.map(([id, nm]) => `<a href="../#t=${esc(id)}">${esc(nm)}</a>`).join('')}</div>`
       : '';
 
-    if (openN) {
-      const i = l.items.findIndex((x) => String(x.n) === String(openN));
+    // ハッシュで指定された開き方を当てる（カードから飛んできたとき）
+    if (o.e && l.eras.some((x) => x.id === o.e)) {
+      eraPick = o.e;
+      document.querySelectorAll('[data-era]').forEach((x) => x.classList.toggle('on', x.dataset.era === o.e));
+    }
+    if (o.q) { q = o.q; $('q').value = o.q; }
+    if (o.n) {
+      const i = l.items.findIndex((x) => String(x.n) === String(o.n));
       if (i >= 0) sel = i;
     }
     draw(); drawSums();
@@ -369,8 +379,11 @@
   function fromHash(keepHash) {
     const h = location.hash.replace('#', '');
     const [id, ...rest] = h.split('&');
-    const nq = (rest.find((s) => s.startsWith('n=')) || '').slice(2);
-    setList(id || LISTS[0].id, keepHash, nq);
+    const get = (k) => {
+      const v = rest.find((x) => x.startsWith(k + '='));
+      try { return v ? decodeURIComponent(v.slice(k.length + 1)) : ''; } catch (e) { return ''; }
+    };
+    setList(id || LISTS[0].id, keepHash, { n: get('n'), e: get('e'), q: get('q') });
   }
   window.addEventListener('hashchange', () => fromHash(true));
 

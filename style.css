@@ -183,11 +183,14 @@ a.tile { display: block; text-decoration: none; color: var(--text); }
 
 /* カードから別アプリの図へ飛ぶリンク（マナーコーナーなど） */
 .fig-links { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; }
+/* 「図で見る」の下に「一覧で見る」が続くときは、間を詰める */
+.fig-links + .fig-links { margin-top: 6px; }
 .fig-link {
   background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
   border-radius: 999px; padding: 4px 12px; font-size: 12px; text-decoration: none;
 }
-.fig-link::before { content: '🖼 '; }
+.fig-link.fig::before { content: '🖼 '; }
+.fig-link.list::before { content: '📜 '; }
 .fig-link:hover { border-color: var(--primary); color: var(--primary); }
 
 /* ---------- クイズ ---------- */

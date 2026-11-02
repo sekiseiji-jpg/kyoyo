@@ -179,10 +179,47 @@ window.FIELDS = [
   },
 ];
 
-// 解説カードから開く図。カードid → [[リンク先, 表示名], …]
-// マナーコーナーの図は manner/#<単元>&f=<図id> で名指しできる。
-// 文章で説明しているものに図があるときだけ結ぶ。無理に全カードへ付けない。
+// 解説カードから開く先。カードid → [[リンク先, 表示名, 種類], …]
+// 種類は 'fig'（図、省いたときの既定）か 'list'（歴代と名家の一覧）。画面では分けて並べる。
+//   図   … manner/#<単元>&f=<図id> でその図を名指しできる。
+//   一覧 … rekidai/#<一覧>&e=<時代> でその時代だけに絞った形で開ける（n= で代、q= で検索語）。
+// 文章で説明しているものに図や一覧があるときだけ結ぶ。無理に全カードへ付けない。
 window.CARD_LINKS = {
+  // ---- 日本史 → 歴代と名家 ----
+  '1-2-02': [['rekidai/#tenno&e=asuka', '歴代天皇（飛鳥）', 'list'],
+    ['rekidai/#tenno&e=nara', '歴代天皇（奈良）', 'list']],
+  '1-2-03': [['rekidai/#tenno&e=heian', '歴代天皇（平安）', 'list'],
+    ['rekidai/#meika-jp&e=sekke', '五摂家', 'list']],
+  '1-2-04': [['rekidai/#buke&e=kam-sho', '鎌倉の将軍9代', 'list'],
+    ['rekidai/#buke&e=kam-shi', '執権16代', 'list'],
+    ['rekidai/#tenno&e=kamakura', '歴代天皇（鎌倉）', 'list']],
+  '1-2-05': [['rekidai/#buke&e=mur-sho', '室町の将軍15代', 'list'],
+    ['rekidai/#tenno&e=nanbokucho', '歴代天皇（南北朝）', 'list']],
+  '1-2-06': [['rekidai/#meika-jp&e=daimyo', '旧大名家', 'list']],
+  '1-2-07': [['rekidai/#buke&e=edo-sho', '江戸の将軍15代', 'list'],
+    ['rekidai/#meika-jp&e=daimyo', '旧大名家', 'list']],
+  '1-2-08': [['rekidai/#souri&e=meiji', '総理大臣（明治）', 'list'],
+    ['rekidai/#meika-jp&e=kunko', '維新の功臣', 'list'],
+    ['rekidai/#tenno&e=kindai', '歴代天皇（明治以降）', 'list']],
+  '1-2-09': [['rekidai/#souri&e=taisho', '総理大臣（大正）', 'list'],
+    ['rekidai/#souri&e=showa', '総理大臣（昭和）', 'list'],
+    ['rekidai/#meika-jp&e=kouzoku', '旧皇族11宮家', 'list']],
+
+  // ---- 世界史・政治 → 世界の名家 ----
+  '1-3-03': [['rekidai/#meika-world&e=past', '歴史に名を残す家', 'list']],
+  '1-3-04': [['rekidai/#meika-world&e=mideast', '中東の王室', 'list']],
+  '1-3-06': [['rekidai/#meika-world&e=past', '歴史に名を残す家', 'list'],
+    ['rekidai/#meika-world&e=europe', 'ヨーロッパの王室', 'list']],
+  '1-3-08': [['rekidai/#meika-world&e=past', '歴史に名を残す家', 'list']],
+  '2-1-03': [['rekidai/#souri', '歴代総理大臣104代', 'list']],
+  '2-1-04': [['rekidai/#souri', '歴代総理大臣104代', 'list']],
+  '2-1-09': [['rekidai/#meika-world', '世界の王家27か国', 'list']],
+
+  // ---- 宗教・暦 → 名家と歴代天皇 ----
+  '1-7-03': [['rekidai/#meika-jp&e=shaji', '社寺と芸の家', 'list']],
+  '1-7-04': [['rekidai/#meika-jp&e=shaji', '社寺と芸の家', 'list']],
+  '5-5-07': [['rekidai/#tenno&e=kindai', '歴代天皇（明治以降）', 'list']],
+
   '5-1-01': [['manner/#sekiji&f=ousetsu', '席次の図']],
   '5-1-05': [['manner/#sekiji&f=ousetsu', '応接室'], ['manner/#sekiji&f=kaigi', '会議室'],
     ['manner/#sekiji&f=kuruma', '車'], ['manner/#sekiji&f=elevator', 'エレベーター']],

@@ -387,12 +387,17 @@ const learn = {
   },
 
   /** そのカードの内容に図があるとき、マナーコーナーなどの図へのリンクを出す */
+  /** カードから開く先。3つ目の値で種類を分ける（省くと図） */
   figLinks(id) {
     const list = CARD_LINKS[id];
     if (!list || !list.length) return '';
-    const links = list.map(([href, label]) =>
-      `<a class="fig-link" href="${esc(href)}">${esc(label)}</a>`).join('');
-    return `<div class="fig-links"><span class="muted small">図で見る</span>${links}</div>`;
+    return [['fig', '図で見る'], ['list', '一覧で見る']].map(([kind, head]) => {
+      const a = list.filter((x) => (x[2] || 'fig') === kind);
+      if (!a.length) return '';
+      const links = a.map(([href, label]) =>
+        `<a class="fig-link ${kind}" href="${esc(href)}">${esc(label)}</a>`).join('');
+      return `<div class="fig-links"><span class="muted small">${head}</span>${links}</div>`;
+    }).join('');
   },
 
   viewTopic() {

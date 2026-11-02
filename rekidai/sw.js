@@ -1,16 +1,16 @@
 // オフライン対応。一覧はデータ5本だけなので、まとめて先に保存する。
 // ファイルを更新したら CACHE の番号と、index.html の ?v= の番号を一緒に上げる。
-const CACHE = 'rekidai-v4';
+const CACHE = 'rekidai-v5';
 const FILES = [
   './',
   'index.html',
-  'style.css?v=4',
-  'app.js?v=4',
-  'data-tenno.js?v=4',
-  'data-buke.js?v=4',
-  'data-souri.js?v=4',
-  'data-meika-jp.js?v=4',
-  'data-meika-world.js?v=4',
+  'style.css?v=5',
+  'app.js?v=5',
+  'data-tenno.js?v=5',
+  'data-buke.js?v=5',
+  'data-souri.js?v=5',
+  'data-meika-jp.js?v=5',
+  'data-meika-world.js?v=5',
 ];
 
 self.addEventListener('install', (e) => {
