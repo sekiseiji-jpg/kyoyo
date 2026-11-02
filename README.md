@@ -159,6 +159,26 @@ node tools/make-map.js <admin1.geojson> <world.geojson> <places.geojson>
 
 エンジンは `manner/app.js` と同じもので、データ（`data-sports.js`）だけが違います。
 
+## 📜 歴代人物（10 個目の分野）
+
+**3つの一覧。天皇126代・将軍39代・執権16代・総理大臣104代。** クイズはありません。引くための一覧です。
+
+| 一覧 | 入口 | 中身 |
+|---|---|---|
+| 歴代天皇 | `rekidai/#tenno` | 126代・124人／伝承の時代から今上天皇まで。女性の天皇と重祚に印 |
+| 将軍と執権 | `rekidai/#buke` | 将軍39代（38人）・執権16代／鎌倉・室町・江戸の三幕府と北条氏 |
+| 歴代総理大臣 | `rekidai/#souri` | 104代・66人／1885年の内閣制度から現在まで |
+
+名前・よみ・ことがら（「院政」「改革」など）で絞り込めます。押すとその人の説明と、前後の代へ
+動くボタンが出ます。在位の長さは棒の長さで比べられます。
+
+**一覧に出る数字は、データではなくアプリが数えたものです。** 代の数・人数・女性の数・最長と最短・
+通算の在任は、すべて在位の年から計算しています。手で書いた数字と中身が食い違わないようにするためで、
+`tools/check-rekidai.js` で機械的に検査できます（最初に作ったときは、これで人数の数え違いが3つ見つかりました）。
+
+重祚と再任（皇極＝斉明、孝謙＝称徳、足利義材＝義稙）はデータの `same` で結んであり、
+**代は2つ、人は1人**と数えます。第1〜32代は年が『記紀』の伝えなので、最長・最短の集計からは外しています。
+
 ## ファイル構成
 
 | ファイル | 役割 | 公開 |
@@ -166,7 +186,7 @@ node tools/make-map.js <admin1.geojson> <world.geojson> <places.geojson>
 | `index.html` | 画面の骨組み。CSS/JS を `?v=N` 付きで読む | ○ |
 | `style.css` | 見た目。CSS 変数でライト/ダーク、640px 以下でスマホ用レイアウト | ○ |
 | `app.js` | すべての動作 | ○ |
-| `data-units.js` | 6分野の骨格（分野・単元名・作成順）と分野カードの色・紹介文 | ○ |
+| `data-units.js` | 10分野の骨格（分野・単元名・作成順）と分野カードの色・紹介文 | ○ |
 | `data-jinbun.js` ほか5本 | 分野ごとに結合したカードとクイズ。**`tools/build.js` が作る** | ○ |
 | `index-term.js` | 辞典の索引。**`tools/build.js` が作る。手で直さない** | ○ |
 | `sw.js` | Service Worker（オフライン対応） | ○ |
@@ -176,12 +196,14 @@ node tools/make-map.js <admin1.geojson> <world.geojson> <places.geojson>
 | `rail/` | 路線図。独立したアプリ。データは `data-rail.js` に手で持つ | ○ |
 | `manner/` | マナーコーナー。独立したアプリ。図は `data-manner.js` の中の手描き SVG | ○ |
 | `sports/` | スポーツコーナー。マナーと同じエンジンで、データだけが違う | ○ |
+| `rekidai/` | 歴代人物一覧。独立したアプリ。データは `data-tenno.js`・`data-buke.js`・`data-souri.js` | ○ |
 | `data/<単元id>.js` | **データの原本**。1単元1ファイル | × |
 | `start.bat` | ローカルサーバー起動（ポート 8792）＋スマホ用アドレス表示 | × |
 | `.claude/launch.json` | Claude Code のプレビュー用サーバー設定 | × |
 | `tools/build.js` | 結合・索引生成・検査 | × |
 | `tools/make-icons.ps1` | アイコン4種の生成（**ASCII のみで書くこと**） | × |
 | `tools/make-map.js` | 地図データの生成（Natural Earth の GeoJSON → SVG パス） | × |
+| `tools/check-rekidai.js` | 歴代人物一覧のデータ検査（代の連番・人数・年の前後・時代の区切り） | × |
 | `tools/list-quiz.js` | 1単元の全30問を一覧表示（`node tools/list-quiz.js 3-1`） | × |
 | `tools/replace-quiz.js` | 問題を id 指定で差し替える（`node tools/replace-quiz.js 3-1 定義.json`）。差し替え前の本文を引用せずに済む | × |
 | `構想.md`・`単元一覧.md`・`再現プロンプト.md` | 設計のドキュメント | × |

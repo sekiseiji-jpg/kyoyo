@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5b4b8a">
+<meta name="description" content="歴代天皇126代、将軍39代と執権16代、内閣総理大臣104代の一覧。在位の長さを並べて比べられます。">
+<title>歴代人物一覧</title>
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+
+<header class="bar">
+  <button id="btn-back" class="icon-btn" title="もどる" aria-label="もどる">◀</button>
+  <div class="bar-title"><span class="logo">📜</span><h1 id="bar-title">歴代人物一覧</h1></div>
+  <button id="btn-reset" class="icon-btn" title="絞り込みを外す" aria-label="絞り込みを外す">⟳</button>
+</header>
+
+<main class="wrap">
+  <nav class="switch" id="list-switch" aria-label="一覧の切り替え"></nav>
+  <p class="unit-lead" id="list-lead"></p>
+
+  <div class="finder">
+    <input type="search" id="q" placeholder="名前・よみ・ことがらで探す" autocomplete="off" aria-label="名前・よみ・ことがらで探す">
+    <div class="chips" id="era-chips"></div>
+    <div class="chips" id="tag-chips"></div>
+  </div>
+
+  <p class="count" id="count"></p>
+  <div id="list" class="plist"></div>
+
+  <div class="card sums"><h2>この一覧の数字</h2><div id="sums"></div></div>
+  <div class="card facts"><h2>数え方の約束</h2><p id="facts"></p></div>
+
+  <div class="cards" id="cards"></div>
+  <p class="foot" id="foot"></p>
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="data-tenno.js?v=1"></script>
+<script src="data-buke.js?v=1"></script>
+<script src="data-souri.js?v=1"></script>
+<script src="app.js?v=1"></script>
+</body>
+</html>
